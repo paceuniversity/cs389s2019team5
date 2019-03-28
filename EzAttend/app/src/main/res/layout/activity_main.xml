@@ -47,6 +47,7 @@
         android:layout_width="392dp"
         android:layout_height="46dp"
         android:layout_marginTop="32dp"
+        android:onClick="launchStudent"
         android:text="Student"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
