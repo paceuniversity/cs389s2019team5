@@ -5,19 +5,19 @@
     android:id="@+id/coordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#C26030"
+    android:background="@color/mainBackground"
     tools:context=".TeacherActivity">
 
     <TextView
         android:id="@+id/menuBarProfessor"
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:background="#d52c2c"
+        android:background="@color/menuBarBackground"
         android:gravity="center|top"
         android:paddingTop="30dp"
         android:text="@string/welcome_professor"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-        android:textColor="#E3DBCA"
+        android:textColor="@color/menuBarText"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
