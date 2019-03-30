@@ -15,7 +15,7 @@
         android:background="#d52c2c"
         android:gravity="center|top"
         android:paddingTop="30dp"
-        android:text="Welcome, Professor"
+        android:text="@string/welcome_professor"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textColor="#E3DBCA"
         app:layout_constraintTop_toTopOf="parent" />
