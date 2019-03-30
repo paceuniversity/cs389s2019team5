@@ -5,44 +5,54 @@
     android:id="@+id/coordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#C26030"
     tools:context=".TeacherActivity">
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/appBarLayout"
+    <TextView
+        android:id="@+id/textView2"
         android:layout_width="match_parent"
-        android:layout_height="73dp"
-        android:padding="10dp"
-        android:theme="@style/AppTheme.AppBarOverlay"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="Welcome, Professor"
-            android:textSize="36sp"
-            tools:layout_editor_absoluteX="10dp"
-            tools:layout_editor_absoluteY="10dp" />
-    </android.support.design.widget.AppBarLayout>
+        android:layout_height="100dp"
+        android:background="#d52c2c"
+        android:gravity="center|top"
+        android:paddingTop="30dp"
+        android:shadowColor="@android:color/darker_gray"
+        android:text="Welcome, Professor"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        android:textColor="#E3DBCA"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/button7"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="75dp"
+        android:layout_marginLeft="10dp"
         android:layout_marginTop="32dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/attendanceborder"
+        android:gravity="right|center_vertical"
+        android:paddingRight="10dp"
         android:text="Take Attendance"
-        app:layout_constraintTop_toBottomOf="@+id/appBarLayout"
-        tools:layout_editor_absoluteX="0dp" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
     <Button
         android:id="@+id/button8"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="75dp"
+        android:layout_marginLeft="10dp"
         android:layout_marginTop="32dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/historyborder"
+        android:gravity="right|center_vertical"
+        android:paddingRight="10dp"
         android:text="Attendance Records"
-        app:layout_constraintTop_toBottomOf="@+id/button7"
-        tools:layout_editor_absoluteX="0dp" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button7" />
 
 </android.support.constraint.ConstraintLayout>
