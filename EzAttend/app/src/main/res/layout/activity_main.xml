@@ -45,6 +45,7 @@
         android:layout_width="392dp"
         android:layout_height="75dp"
         android:layout_marginTop="32dp"
+        android:onClick="launchStudent"
         android:background="@drawable/capborder"
         android:gravity="center_vertical"
         android:paddingLeft="10dp"
