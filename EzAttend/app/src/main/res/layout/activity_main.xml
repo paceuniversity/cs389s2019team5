@@ -16,7 +16,7 @@
         android:background="@color/menuBarBackground"
         android:gravity="center|top"
         android:paddingTop="20dp"
-        android:text="Main Menu"
+        android:text="@string/main_menu"
         android:textAppearance="@style/TextAppearance.AppCompat.Display2"
         android:textColor="@color/menuBarText"
         app:layout_constraintTop_toTopOf="parent" />
