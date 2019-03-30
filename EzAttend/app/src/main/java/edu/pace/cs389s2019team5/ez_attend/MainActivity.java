@@ -2,10 +2,7 @@ package edu.pace.cs389s2019team5.ez_attend;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
@@ -20,6 +17,11 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("Launching student");
         Intent intent = new Intent(this, StudentActivity.class);
         startActivity(intent);
+    }
+
+    public void openTeacherActivity(View v){
+        Intent i = new Intent(MainActivity.this, TeacherActivity.class);
+        startActivity(i);
     }
 
 }
