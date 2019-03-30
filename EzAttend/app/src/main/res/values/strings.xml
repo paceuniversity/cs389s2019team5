@@ -9,4 +9,8 @@
     <string name="title_activity_teacher">TeacherActivity</string>
     <string name="welcome_professor">Welcome, Professor</string>
     <string name="main_menu">Main Menu</string>
+    <string name="teacher">Teacher</string>
+    <string name="student">Student</string>
+    <string name="teacher_take_attendance">Take Attendance</string>
+    <string name="attendance_records">Attendance Records</string>
 </resources>
