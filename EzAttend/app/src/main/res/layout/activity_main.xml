@@ -5,49 +5,54 @@
     android:id="@+id/constraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#C26030"
     tools:context=".MainActivity">
 
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/appBarLayout2"
-        android:layout_width="0dp"
-        android:layout_height="69dp"
-        android:padding="10dp"
-        android:theme="@style/AppTheme.AppBarOverlay"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Main Menu"
-            android:textSize="36sp" />
-
-    </android.support.design.widget.AppBarLayout>
-
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="#d52c2c"
+        android:gravity="center|top"
+        android:paddingTop="20dp"
+        android:shadowColor="@android:color/darker_gray"
+        android:text="Main Menu"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+        android:textColor="#E3DBCA"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/button"
         android:layout_width="0dp"
-        android:layout_height="46dp"
+        android:layout_height="75dp"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="32dp"
         android:layout_marginRight="10dp"
+        android:background="@drawable/appleborder"
+        android:gravity="center_vertical"
+        android:onClick="openTeacherActivity"
+        android:paddingLeft="10dp"
         android:text="Teacher"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+        android:textColor="@android:color/black"
+        android:typeface="normal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appBarLayout2" />
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <Button
         android:id="@+id/button2"
         android:layout_width="392dp"
-        android:layout_height="46dp"
+        android:layout_height="75dp"
         android:layout_marginTop="32dp"
+        android:background="@drawable/capborder"
+        android:gravity="center_vertical"
+        android:paddingLeft="10dp"
         android:text="Student"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+        android:textColor="@android:color/black"
+        android:typeface="normal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button" />
