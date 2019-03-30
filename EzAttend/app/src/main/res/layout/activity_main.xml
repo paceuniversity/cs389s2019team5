@@ -5,25 +5,24 @@
     android:id="@+id/constraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#C26030"
+    android:background="@color/mainBackground"
     tools:context=".MainActivity">
 
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/menuBarMain"
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:background="#d52c2c"
+        android:background="@color/menuBarBackground"
         android:gravity="center|top"
         android:paddingTop="20dp"
-        android:shadowColor="@android:color/darker_gray"
         android:text="Main Menu"
         android:textAppearance="@style/TextAppearance.AppCompat.Display2"
-        android:textColor="#E3DBCA"
+        android:textColor="@color/menuBarText"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/teacherActivityButton"
         android:layout_width="0dp"
         android:layout_height="75dp"
         android:layout_marginLeft="10dp"
@@ -39,10 +38,10 @@
         android:typeface="normal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/menuBarMain" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/studentActivityButton"
         android:layout_width="392dp"
         android:layout_height="75dp"
         android:layout_marginTop="32dp"
@@ -55,6 +54,6 @@
         android:typeface="normal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button" />
+        app:layout_constraintTop_toBottomOf="@+id/teacherActivityButton" />
 
 </android.support.constraint.ConstraintLayout>

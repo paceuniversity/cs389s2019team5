@@ -9,20 +9,19 @@
     tools:context=".TeacherActivity">
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/menuBarProfessor"
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:background="#d52c2c"
         android:gravity="center|top"
         android:paddingTop="30dp"
-        android:shadowColor="@android:color/darker_gray"
         android:text="Welcome, Professor"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textColor="#E3DBCA"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/button7"
+        android:id="@+id/takeAttendanceButton"
         android:layout_width="0dp"
         android:layout_height="75dp"
         android:layout_marginLeft="10dp"
@@ -36,10 +35,10 @@
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+        app:layout_constraintTop_toBottomOf="@+id/menuBarProfessor" />
 
     <Button
-        android:id="@+id/button8"
+        android:id="@+id/attendanceRecordsButtron"
         android:layout_width="0dp"
         android:layout_height="75dp"
         android:layout_marginLeft="10dp"
@@ -53,6 +52,6 @@
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button7" />
+        app:layout_constraintTop_toBottomOf="@+id/takeAttendanceButton" />
 
 </android.support.constraint.ConstraintLayout>
