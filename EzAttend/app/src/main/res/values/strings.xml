@@ -2,7 +2,7 @@
     <string name="app_name">Ez-Attend</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_student">StudentActivity</string>
-    <string name="check_in"> Check in </string>
+    <string name="check_in"> Check In </string>
     <string name="sign_in">Sign in</string>
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
@@ -13,4 +13,6 @@
     <string name="student">Student</string>
     <string name="teacher_take_attendance">Take Attendance</string>
     <string name="attendance_records">Attendance Records</string>
+    <string name="welcome_student">Welcome, Student</string>
+    <string name="my_home">My Home</string>
 </resources>
