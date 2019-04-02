@@ -69,20 +69,47 @@ public class Controller {
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
 
                         List list = queryDocumentSnapshots.getDocuments();
-                        DocumentSnapshot snap = (DocumentSnapshot) list.get(0);
-                        Map<String, Object> userTimeStamp = new HashMap<>();
-                        userTimeStamp.put("timeStamp", FieldValue.serverTimestamp());
 
-                        db.collection("sessions/" + snap.getId() + "/attendees")
-                                .document(id)
-                                .set(userTimeStamp)
-                                .addOnSuccessListener(onSuccessListener).addOnFailureListener(onFailureListener);
+                        if (list.isEmpty()) {
+                            Log.i(TAG, "There are no sessions created");
+                            onFailureListener.onFailure(new NullPointerException("No sessions created"));
+                            return;
+                        }
+                        final DocumentSnapshot sessionSnapShot = (DocumentSnapshot) list.get(0);
+
+                        db.collection("sessions/" + sessionSnapShot.getId() + "/attendees")
+                                .document(id).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                            @Override
+                            public void onSuccess(DocumentSnapshot studentSnapshot) {
+                                if (studentSnapshot.exists()) {
+                                    // the student has already checked in to this session
+                                    Log.i(TAG, "Student has already been marked previously for this class");
+                                    onSuccessListener.onSuccess(null);
+                                } else {
+                                    // the student hasn't checked in to this session
+                                    Map<String, Object> userTimeStamp = new HashMap<>();
+                                    userTimeStamp.put("timeStamp", FieldValue.serverTimestamp());
+
+                                    Log.i(TAG, "Marking student present for most recent session");
+                                    db.collection("sessions/" + sessionSnapShot.getId() + "/attendees")
+                                            .document(id).set(userTimeStamp).addOnSuccessListener(onSuccessListener).addOnFailureListener(onFailureListener);
+                                }
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.d(TAG, "Couldn't check if the user exists in mark present", e);
+                                onFailureListener.onFailure(e);
+                            }
+                        });
+
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "Failed to mark student present");
+                        Log.e(TAG, "Couldn't not get most recent session", e);
+                        onFailureListener.onFailure(e);
                     }
                 });
 
