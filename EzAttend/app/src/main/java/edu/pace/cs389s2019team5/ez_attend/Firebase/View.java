@@ -7,7 +7,9 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -144,6 +146,15 @@ public class View {
 
     }
 
+    public ListenerRegistration listenForMarking(String courseId,
+                                                 String studentId,
+                                                 EventListener<DocumentSnapshot> eventListener) {
+
+        final DocumentReference docRef = db.collection("sessions/ " + courseId + "/attendees").document(studentId);
+        return docRef.addSnapshotListener(eventListener);
+
+    }
+
     /**
      * Given a Firebase firestore snapshot of a student produces a student object that can be
      * manipulated by the rest of the view
@@ -161,6 +172,7 @@ public class View {
 
         student.setFirstName(snapshot.getString("firstName"));
         student.setLastName(snapshot.getString("lastName"));
+        student.setMacAddress(snapshot.getString("macAddress"));
 
         return student;
 
