@@ -81,7 +81,7 @@ public class Controller {
                                 .document(id).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                             @Override
                             public void onSuccess(DocumentSnapshot studentSnapshot) {
-                                if (studentSnapshot.exists()) {
+                                if (studentSnapshot.exists() && studentSnapshot.get("timeStamp") != null) {
                                     // the student has already checked in to this session
                                     Log.i(TAG, "Student has already been marked previously for this class");
                                     onSuccessListener.onSuccess(null);
@@ -115,4 +115,72 @@ public class Controller {
 
     }
 
+    /**
+     * Used by the teacher to mark a student present. This is specifically used by bluetooth support.
+     * As opposed to markPresent which is used by a student to mark themselves present, this adds
+     * a new field to the document called teacherTimestamp which marks when the teacher device
+     * detected the student.
+     * @param id the id of the student that the teacher wishes to mark present
+     * @param onSuccessListener the callback when the student is successfully marked present
+     * @param onFailureListener the callback when marking the student present fails
+     */
+    public void teacherMarkPresent(final String id,
+                                   final OnSuccessListener<Void> onSuccessListener,
+                                   final OnFailureListener onFailureListener) {
+
+        db.collection("sessions")
+                .orderBy("startTime", Query.Direction.DESCENDING)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+
+                        List list = queryDocumentSnapshots.getDocuments();
+
+                        if (list.isEmpty()) {
+                            Log.i(TAG, "There are no sessions created");
+                            onFailureListener.onFailure(new NullPointerException("No sessions created"));
+                            return;
+                        }
+                        final DocumentSnapshot sessionSnapShot = (DocumentSnapshot) list.get(0);
+
+                        db.collection("sessions/" + sessionSnapShot.getId() + "/attendees")
+                                .document(id).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                            @Override
+                            public void onSuccess(DocumentSnapshot studentSnapshot) {
+                                if (studentSnapshot.exists() && studentSnapshot.get("teacherTimestamp") != null) {
+                                    // the student has already checked in to this session
+                                    Log.i(TAG, "Student has already been marked previously for this class");
+                                    onSuccessListener.onSuccess(null);
+                                } else {
+                                    // the student hasn't checked in to this session
+                                    Map<String, Object> userTimeStamp = new HashMap<>();
+                                    userTimeStamp.put("teacherTimestamp", FieldValue.serverTimestamp());
+
+                                    Log.i(TAG, "Marking student present for most recent session");
+                                    db.collection("sessions/" + sessionSnapShot.getId() + "/attendees")
+                                            .document(id).set(userTimeStamp)
+                                            .addOnSuccessListener(onSuccessListener)
+                                            .addOnFailureListener(onFailureListener);
+                                }
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.d(TAG, "Couldn't check if the user exists in mark present", e);
+                                onFailureListener.onFailure(e);
+                            }
+                        });
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Couldn't not get most recent session", e);
+                        onFailureListener.onFailure(e);
+                    }
+                });
+    }
 }
