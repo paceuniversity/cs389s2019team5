@@ -124,7 +124,9 @@ public class Controller {
      * @param onSuccessListener the callback when the student is successfully marked present
      * @param onFailureListener the callback when marking the student present fails
      */
-    public void teacherMarkPresent(final String id, final OnSuccessListener<Void> onSuccessListener, final OnFailureListener onFailureListener) {
+    public void teacherMarkPresent(final String id,
+                                   final OnSuccessListener<Void> onSuccessListener,
+                                   final OnFailureListener onFailureListener) {
 
         db.collection("sessions")
                 .orderBy("startTime", Query.Direction.DESCENDING)
@@ -158,7 +160,9 @@ public class Controller {
 
                                     Log.i(TAG, "Marking student present for most recent session");
                                     db.collection("sessions/" + sessionSnapShot.getId() + "/attendees")
-                                            .document(id).set(userTimeStamp).addOnSuccessListener(onSuccessListener).addOnFailureListener(onFailureListener);
+                                            .document(id).set(userTimeStamp)
+                                            .addOnSuccessListener(onSuccessListener)
+                                            .addOnFailureListener(onFailureListener);
                                 }
                             }
                         }).addOnFailureListener(new OnFailureListener() {

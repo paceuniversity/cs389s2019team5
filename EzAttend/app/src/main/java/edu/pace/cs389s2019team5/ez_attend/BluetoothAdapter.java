@@ -187,7 +187,10 @@ public class BluetoothAdapter {
      * @return true if the listener was successfully initialized, false otherwise such as if bluetooth
      * is disabled.
      */
-    public boolean signIn(View view, String sessionId, final String studentId, final OnSuccessListener<Void> successListener, final OnFailureListener failureListener) {
+    public boolean signIn(View view, String sessionId,
+                          final String studentId,
+                          final OnSuccessListener<Void> successListener,
+                          final OnFailureListener failureListener) {
 
         if (this.m_role == Role.TEACHER) {
             throw new UnsupportedOperationException("Teacher cannot sign in to a class");
