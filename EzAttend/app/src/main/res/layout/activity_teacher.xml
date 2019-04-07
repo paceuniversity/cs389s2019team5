@@ -47,6 +47,7 @@
         android:layout_marginRight="10dp"
         android:background="@drawable/historyborder"
         android:gravity="end|center_vertical"
+        android:onClick="exportAttendance"
         android:paddingRight="10dp"
         android:text="@string/attendance_records"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
