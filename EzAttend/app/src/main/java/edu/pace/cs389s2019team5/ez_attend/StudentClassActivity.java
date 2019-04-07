@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -39,11 +40,17 @@ public class StudentClassActivity extends AppCompatActivity {
         controller.markPresent(studentId, new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
+                Toast.makeText(StudentClassActivity.this,
+                        "Successfully marked present for most recent class",
+                        Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "Successfully marked present for last class");
             }
         }, new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
+                Toast.makeText(StudentClassActivity.this,
+                        "Failed to mark student present",
+                        Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "Couldn't mark student present", e);
             }
         });
