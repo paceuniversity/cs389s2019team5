@@ -29,6 +29,7 @@
         android:layout_marginRight="10dp"
         android:background="@drawable/attendanceborder"
         android:gravity="end|center_vertical"
+        android:onClick="launchAttendance"
         android:paddingRight="10dp"
         android:text="@string/teacher_take_attendance"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
