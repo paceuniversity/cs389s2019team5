@@ -5,6 +5,7 @@ public class Student {
     private String id;
     private String firstName;
     private String lastName;
+    private String macAddress;
 
     public Student (String id) {
         this.id = id;
@@ -22,12 +23,20 @@ public class Student {
         return lastName;
     }
 
+    public String getMacAddress() {
+        return macAddress;
+    }
+
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public void setMacAddress(String mac_address) {
+        this.macAddress = mac_address;
     }
 
     @Override
@@ -41,5 +50,15 @@ public class Student {
     @Override
     public int hashCode() {
         return this.id.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "id='" + id + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", macAddress='" + macAddress + '\'' +
+                '}';
     }
 }

@@ -1,12 +1,14 @@
 package edu.pace.cs389s2019team5.ez_attend.Firebase;
 
-import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 
 public class ClassSession {
 
     private String id;
-    private ArrayList<Student> attendees;
+    private Date startTime;
+    private HashMap<Student, Date> attendees;
 
     public ClassSession(String id) {
         if (id == null) {
@@ -15,12 +17,16 @@ public class ClassSession {
         this.id = id;
     }
 
-    public void setAttendees(ArrayList<Student> attendees) {
+    public void setAttendees(HashMap<Student, Date> attendees) {
         this.attendees = attendees;
     }
 
     public Iterator<Student> getAttendeeIterator() {
-        return attendees.iterator();
+        return attendees.keySet().iterator();
+    }
+
+    public Date getStudentArrivalTime(Student student) {
+        return attendees.get(student);
     }
 
     public String getId() {
@@ -40,5 +46,22 @@ public class ClassSession {
     @Override
     public int hashCode() {
         return id.hashCode();
+    }
+
+    public Date getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
+    }
+
+    @Override
+    public String toString() {
+        return "ClassSession{" +
+                "id='" + id + '\'' +
+                ", startTime=" + startTime +
+                ", attendees=" + attendees +
+                '}';
     }
 }

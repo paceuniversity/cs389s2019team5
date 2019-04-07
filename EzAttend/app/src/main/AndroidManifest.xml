@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="edu.pace.cs389s2019team5.ez_attend">
 
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,7 +13,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".StudentClassActivity"></activity>
+        <activity
+            android:name=".StudentClassActivity"
+            android:theme="@style/AppTheme.NoActionBar" >
+        </activity>
         <activity
             android:name=".TeacherActivity"
             android:label="@string/title_activity_teacher"
@@ -32,7 +39,8 @@
 
         <activity
             android:name=".StudentActivity"
-            android:label="@string/title_activity_student" >
+            android:label="@string/title_activity_student"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
     </application>
 
