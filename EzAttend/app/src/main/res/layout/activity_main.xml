@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/mainBackground"
+    tools:context=".MainActivity">
+
+
+    <TextView
+        android:id="@+id/menuBarMain"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="@color/menuBarBackground"
+        android:gravity="center|top"
+        android:paddingTop="20dp"
+        android:text="@string/main_menu"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+        android:textColor="@color/menuBarText"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/teacherActivityButton"
+        android:layout_width="0dp"
+        android:layout_height="75dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/appleborder"
+        android:gravity="center_vertical"
+        android:onClick="openTeacherActivity"
+        android:paddingLeft="10dp"
+        android:text="@string/teacher"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+        android:textColor="@android:color/black"
+        android:typeface="normal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/menuBarMain" />
+
+    <Button
+        android:id="@+id/studentActivityButton"
+        android:layout_width="0dp"
+        android:layout_height="75dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/capborder"
+        android:gravity="center_vertical"
+        android:onClick="launchStudent"
+        android:paddingLeft="10dp"
+        android:text="@string/student"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+        android:textColor="@android:color/black"
+        android:typeface="normal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/teacherActivityButton" />
+
+</android.support.constraint.ConstraintLayout>
