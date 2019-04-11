@@ -1,8 +1,6 @@
 package edu.pace.cs389s2019team5.ez_attend;
 
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -11,6 +9,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import edu.pace.cs389s2019team5.ez_attend.ClassListFragments.RecentFragment;
+import edu.pace.cs389s2019team5.ez_attend.ClassListFragments.StudentFragment;
+import edu.pace.cs389s2019team5.ez_attend.ClassListFragments.TeacherFragment;
 
 public class ClassListActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {

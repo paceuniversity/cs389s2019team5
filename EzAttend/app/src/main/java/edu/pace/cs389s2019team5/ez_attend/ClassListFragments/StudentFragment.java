@@ -1,10 +1,12 @@
-package edu.pace.cs389s2019team5.ez_attend;
+package edu.pace.cs389s2019team5.ez_attend.ClassListFragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import edu.pace.cs389s2019team5.ez_attend.R;
 
 
 public class StudentFragment extends Fragment {
