@@ -12,16 +12,15 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Student;
 
 public class StudentActivity extends AppCompatActivity {
 
@@ -35,6 +34,14 @@ public class StudentActivity extends AppCompatActivity {
 
     public void studentSignIn(View view) {
         // Check that the first name and last name are entered
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+
+        if (auth.getCurrentUser() == null) {
+            startActivity(new Intent(this, MainActivity.class));
+            return;
+        }
+
+        final String userId = auth.getCurrentUser().getUid();
         EditText txtFirstName = findViewById(R.id.txtFirstName);
         EditText txtLastName = findViewById(R.id.txtLastName);
 
@@ -49,61 +56,41 @@ public class StudentActivity extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         final CollectionReference studentsRef = db.collection("students");
-        final Query query = studentsRef
-                .whereEqualTo("firstName", userFirstName)
-                .whereEqualTo("lastName", userLastName);
+        final DocumentReference docRef = studentsRef.document(userId);
 
-        query.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                List<DocumentSnapshot> documents = queryDocumentSnapshots.getDocuments();
+        Map<String, Object> user = new HashMap<>();
+        user.put("firstName", userFirstName);
+        user.put("lastName", userLastName);
+        final String macAddress;
 
-                if (documents.size() == 0) {
-                    // Create a new user
-                    Map<String, Object> user = new HashMap<>();
-                    user.put("firstName", userFirstName);
-                    user.put("lastName", userLastName);
+        if (BluetoothAdapter.getDefaultAdapter() == null) {
+            Log.w(TAG, "No Bluetooth connected");
+            macAddress = "noMac";
+        } else {
+            macAddress = BluetoothAdapter.getDefaultAdapter().getAddress();
+        }
 
-                    if (BluetoothAdapter.getDefaultAdapter() == null) {
-                        Log.w(TAG, "No Bluetooth connected");
-                        user.put("macAddress", "noMac");
-                    } else {
-                        String macAddress = BluetoothAdapter.getDefaultAdapter().getAddress();
-                        user.put("macAddress", macAddress);
+        user.put("macAddress", macAddress);
+
+        docRef.set(user)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Student student = new Student(userId, userFirstName, userLastName, macAddress);
+                        launchClassList(student);
                     }
-
-                    studentsRef.add(user).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                        @Override
-                        public void onSuccess(DocumentReference documentReference) {
-                            launchStudentCheckInActivity(documentReference.getId());
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.e(TAG, "Couldn't create a new user", e);
-                        }
-                    });
-
-                } else {
-                    // log in with the user
-                    DocumentSnapshot snap = documents.get(0);
-                    String id = snap.getId();
-                    launchStudentCheckInActivity(id);
-                }
-
-            }
-        }).addOnFailureListener(new OnFailureListener() {
+                }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Log.e(TAG, "Could not connect", e);
+                Log.e(TAG, "Couldn't create a new user", e);
             }
         });
 
     }
 
-    private void launchStudentCheckInActivity(String id) {
-        Intent intent = new Intent(this, StudentClassActivity.class);
-        intent.putExtra(StudentClassActivity.STUDENT_ID_EXTRA_TAG, id);
+    private void launchClassList(Student student) {
+        Intent intent = new Intent(this, ClassListActivity.class);
+        intent.putExtra(ClassListActivity.CURRENT_USER_TAG, student);
         startActivity(intent);
     }
 

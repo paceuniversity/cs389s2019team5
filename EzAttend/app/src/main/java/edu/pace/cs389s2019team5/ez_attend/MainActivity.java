@@ -2,16 +2,20 @@ package edu.pace.cs389s2019team5.ez_attend;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.Arrays;
+
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Student;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() != null) {
-
+            checkSignIn();
         } else {
             startActivityForResult(
                     // Get an instance of AuthUI based on the default app
@@ -48,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
             // Successfully signed in
             if (resultCode == RESULT_OK) {
                 Log.i(TAG, "Successfully logged in");
+                checkSignIn();
             } else {
                 // Sign in failed
                 if (response == null) {
@@ -66,15 +71,37 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void launchStudent(View view) {
-        System.out.println("Launching student");
-        Intent intent = new Intent(this, ClassListActivity.class);//temporarily changed to open new main menu
-        startActivity(intent);
-    }
+    private void checkSignIn() {
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        if (auth.getCurrentUser() != null) {
+            edu.pace.cs389s2019team5.ez_attend.Firebase.View view = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
 
-    public void openTeacherActivity(View v){
-        Intent i = new Intent(MainActivity.this, TeacherActivity.class);
-        startActivity(i);
-    }
+            view.getStudent(auth.getCurrentUser().getUid(), new OnSuccessListener<Student>() {
+                @Override
+                public void onSuccess(Student student) {
+                    if (student == null) {
+                        Log.d(TAG, "First time student signs in to this app");
+                        Intent intent = new Intent(MainActivity.this, StudentActivity.class);
+                        startActivity(intent);
+                    } else {
+                        Intent intent = new Intent(MainActivity.this, ClassListActivity.class);
+                        intent.putExtra(ClassListActivity.CURRENT_USER_TAG, student);
+                        startActivity(intent);
+                    }
+                }
+            }, new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.i(TAG, "Couldn't check if student exists");
+                    // todo tell them we couldn't sign them in and try again later?
+                }
+            });
 
+        } else {
+            // This should never happen
+            NullPointerException exc = new NullPointerException("User signed in but null user");
+            Log.e(TAG, "User attempted to sign in but auth wasn't initialized", exc);
+            throw exc;
+        }
+    }
 }
