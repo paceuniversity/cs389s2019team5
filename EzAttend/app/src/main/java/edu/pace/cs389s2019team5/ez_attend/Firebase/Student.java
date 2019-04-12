@@ -2,6 +2,7 @@ package edu.pace.cs389s2019team5.ez_attend.Firebase;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 public class Student implements Parcelable {
 
@@ -9,10 +10,6 @@ public class Student implements Parcelable {
     private String firstName;
     private String lastName;
     private String macAddress;
-
-    public Student (String id) {
-        this.id = id;
-    }
 
     public Student (String id, String firstName, String lastName, String macAddress) {
         this.id = id;
@@ -47,6 +44,25 @@ public class Student implements Parcelable {
 
     public void setMacAddress(String mac_address) {
         this.macAddress = mac_address;
+    }
+
+    /**
+     * Given a Firebase firestore snapshot of a student produces a student object that can be
+     * manipulated by the rest of the view
+     * @param snapshot the firebase snapshot of a student
+     * @return the student object based off of the student snapshot that was provided
+     * @throws NullPointerException if the snapshot provided was null or the student data was null
+     */
+    public static Student fromSnapshot(DocumentSnapshot snapshot) {
+        if (snapshot == null) {
+            throw new NullPointerException("Snapshot cannot be null");
+        }
+
+        String firstName = snapshot.getString("firstName");
+        String lastName = snapshot.getString("lastName");
+        String macAddress = snapshot.getString("macAddress");
+
+        return new Student(snapshot.getId(), firstName, lastName, macAddress);
     }
 
     @Override

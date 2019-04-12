@@ -1,36 +1,41 @@
 package edu.pace.cs389s2019team5.ez_attend.Firebase;
 
+import com.google.firebase.firestore.DocumentSnapshot;
+
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 
 public class ClassSession {
 
+    private final static String TAG = ClassSession.class.getName();
+    public final static String ATTENDEES = "attendees";
+
     private String id;
     private Date startTime;
-    private HashMap<Student, Date> attendees;
 
-    public ClassSession(String id) {
+    public ClassSession(String id, Date startTime) {
         if (id == null) {
             throw new IllegalArgumentException("id cannot be null");
         }
         this.id = id;
-    }
-
-    public void setAttendees(HashMap<Student, Date> attendees) {
-        this.attendees = attendees;
-    }
-
-    public Iterator<Student> getAttendeeIterator() {
-        return attendees.keySet().iterator();
-    }
-
-    public Date getStudentArrivalTime(Student student) {
-        return attendees.get(student);
+        this.startTime = startTime;
     }
 
     public String getId() {
         return id;
+    }
+
+    /**
+     * Given a Firebase firestore snapshot of a session produces a session object that can be
+     * manipulated by the rest of the view
+     * @param snapshot the firebase snapshot of a session
+     * @return the session object based off of the session snapshot that was provided
+     * @throws NullPointerException if the snapshot provided was null or the session data was null
+     */
+    public static ClassSession fromSnapshot(DocumentSnapshot snapshot) {
+        if (snapshot == null) {
+            throw new NullPointerException("Snapshot cannot be null");
+        }
+        return new ClassSession(snapshot.getId(), snapshot.getDate("startTime"));
     }
 
     @Override
@@ -52,16 +57,11 @@ public class ClassSession {
         return startTime;
     }
 
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
-    }
-
     @Override
     public String toString() {
         return "ClassSession{" +
                 "id='" + id + '\'' +
                 ", startTime=" + startTime +
-                ", attendees=" + attendees +
                 '}';
     }
 }

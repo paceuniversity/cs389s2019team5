@@ -27,7 +27,7 @@ public class Controller {
      * @param successListener what should be done when the creation of the class session was successful.
      *                        A class session will be passed which can be used to get the id and timestamp
      */
-    public void beginClassSession(final OnSuccessListener<ClassSession> successListener, final OnFailureListener failureListener) {
+    public void beginClassSession(final OnSuccessListener<String> successListener, final OnFailureListener failureListener) {
 
         Map<String, Object> session = new HashMap<>();
         session.put("startTime", FieldValue.serverTimestamp());
@@ -38,7 +38,7 @@ public class Controller {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
                         Log.i(TAG, "Session successfully created");
-                        successListener.onSuccess(new ClassSession(documentReference.getId()));
+                        successListener.onSuccess(documentReference.getId());
 
                     }
                 })
