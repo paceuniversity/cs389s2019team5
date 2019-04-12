@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void launchStudent(View view) {
         System.out.println("Launching student");
-        Intent intent = new Intent(this, StudentActivity.class);
+        Intent intent = new Intent(this, ClassListActivity.class);//temporarily changed to open new main menu
         startActivity(intent);
     }
 
