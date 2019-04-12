@@ -14,8 +14,6 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 
 public class View {
 
@@ -42,7 +40,7 @@ public class View {
                     ArrayList<Student> students = new ArrayList<>();
                     for (QueryDocumentSnapshot docSnapshot : queryDocumentSnapshots) {
                         try {
-                            Student student = getStudentFromDocSnap(docSnapshot);
+                            Student student = Student.fromSnapshot(docSnapshot);
                             students.add(student);
                         } catch (NullPointerException exc) {
                             Log.e(TAG, "Error parsing student", exc);
@@ -71,7 +69,7 @@ public class View {
                 if (snapshot.exists()) {
                     Student student;
                     try {
-                        student = getStudentFromDocSnap(snapshot);
+                        student = Student.fromSnapshot(snapshot);
                     } catch (NullPointerException exc) {
                         student = null;
                         Log.w(TAG, "Student with id " + id + " was corrupt ", exc);
@@ -105,7 +103,7 @@ public class View {
                         ArrayList<ClassSession> sessions = new ArrayList<>();
                         for (QueryDocumentSnapshot docSnapshot : queryDocumentSnapshots) {
                             try {
-                                ClassSession session = getSessionFromDocSnap(docSnapshot);
+                                ClassSession session = ClassSession.fromSnapshot(docSnapshot);
                                 sessions.add(session);
                             } catch (NullPointerException exc) {
                                 Log.e(TAG, "Error parsing session", exc);
@@ -124,75 +122,41 @@ public class View {
      * @param onFailureListener the failure callback for this info
      */
     public void getSessionAttendance(final ClassSession session,
-                                     final OnSuccessListener<ClassSession> onSuccessListener,
+                                     final OnSuccessListener<ArrayList<Attendee>> onSuccessListener,
                                      OnFailureListener onFailureListener) {
 
         CollectionReference attendeesCollection = db.collection("sessions")
                 .document(session.getId())
-                .collection("attendees");
+                .collection(ClassSession.ATTENDEES);
 
         attendeesCollection.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot snapshot) {
-                HashMap<Student, Date> mMap = new HashMap<>();
+                ArrayList<Attendee> attendees = new ArrayList<>();
                 for (QueryDocumentSnapshot snap : snapshot) {
-                    mMap.put(new Student(snap.getId()), snap.getDate("timeStamp"));
+                    Log.d(TAG, "Got attendee with id: " + snap.getId());
+                    attendees.add(Attendee.fromSnapshot(snap));
                 }
 
-                session.setAttendees(mMap);
-                onSuccessListener.onSuccess(session);
+                onSuccessListener.onSuccess(attendees);
             }
         }).addOnFailureListener(onFailureListener);
 
     }
 
+    /**
+     * Used by students to wait until they are marked present by their teacher.
+     * @param courseId
+     * @param studentId
+     * @param eventListener
+     * @return
+     */
     public ListenerRegistration listenForMarking(String courseId,
                                                  String studentId,
                                                  EventListener<DocumentSnapshot> eventListener) {
 
         final DocumentReference docRef = db.collection("sessions/ " + courseId + "/attendees").document(studentId);
         return docRef.addSnapshotListener(eventListener);
-
-    }
-
-    /**
-     * Given a Firebase firestore snapshot of a student produces a student object that can be
-     * manipulated by the rest of the view
-     * @param snapshot the firebase snapshot of a student
-     * @return the student object based off of the student snapshot that was provided
-     * @throws NullPointerException if the snapshot provided was null or the student data was null
-     */
-    private Student getStudentFromDocSnap(DocumentSnapshot snapshot) {
-
-        if (snapshot == null) {
-            throw new NullPointerException("Snapshot cannot be null");
-        }
-
-        Student student = new Student(snapshot.getId());
-
-        student.setFirstName(snapshot.getString("firstName"));
-        student.setLastName(snapshot.getString("lastName"));
-        student.setMacAddress(snapshot.getString("macAddress"));
-
-        return student;
-
-    }
-
-    /**
-     * Given a Firebase firestore snapshot of a session produces a session object that can be
-     * manipulated by the rest of the view
-     * @param snapshot the firebase snapshot of a session
-     * @return the session object based off of the session snapshot that was provided
-     * @throws NullPointerException if the snapshot provided was null or the session data was null
-     */
-    private ClassSession getSessionFromDocSnap(DocumentSnapshot snapshot) {
-
-        if (snapshot == null) {
-            throw new NullPointerException("Snapshot cannot be null");
-        }
-        ClassSession session = new ClassSession(snapshot.getId());
-        session.setStartTime(snapshot.getDate("startTime"));
-        return session;
 
     }
 
