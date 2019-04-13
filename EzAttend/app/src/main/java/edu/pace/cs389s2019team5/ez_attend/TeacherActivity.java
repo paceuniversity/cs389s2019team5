@@ -35,7 +35,7 @@ public class TeacherActivity extends AppCompatActivity {
 
     public void launchAttendance (View view) {
         Controller session = new Controller();
-        session.beginClassSession(new OnSuccessListener<String>() {
+        session.beginClassSession(Controller.DEBUG_CLASS_ID, new OnSuccessListener<String>() {
             @Override
             public void onSuccess(String sessionId) {
                 Toast.makeText(TeacherActivity.this,
@@ -62,7 +62,7 @@ public class TeacherActivity extends AppCompatActivity {
         sessionsOld = new ArrayList<>();
 
         sessionsNew = new Hashtable<>();
-        v.getSessions(new OnSuccessListener<ArrayList<ClassSession>>() {
+        v.getSessions(Controller.DEBUG_CLASS_ID, new OnSuccessListener<ArrayList<ClassSession>>() {
             @Override
             public void onSuccess(ArrayList<ClassSession> classSessions) {
                 sessionsOld = classSessions;
@@ -83,7 +83,7 @@ public class TeacherActivity extends AppCompatActivity {
     }
     private void addAttendees(final ClassSession session) {
         final edu.pace.cs389s2019team5.ez_attend.Firebase.View v = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
-            v.getSessionAttendance(session,new OnSuccessListener<ArrayList<Attendee>>() {
+            v.getSessionAttendance(Controller.DEBUG_CLASS_ID, session,new OnSuccessListener<ArrayList<Attendee>>() {
                 @Override
                 public void onSuccess(ArrayList<Attendee> attendees) {
                     sessionsNew.put(session, attendees);

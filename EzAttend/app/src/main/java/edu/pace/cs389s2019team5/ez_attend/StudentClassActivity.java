@@ -37,7 +37,7 @@ public class StudentClassActivity extends AppCompatActivity {
 
     public void checkIn(View view) {
         Log.i(TAG, "Student checking in");
-        controller.markPresent(studentId, new OnSuccessListener<Void>() {
+        controller.markPresent(Controller.DEBUG_CLASS_ID, studentId, new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Toast.makeText(StudentClassActivity.this,

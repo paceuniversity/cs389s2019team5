@@ -23,32 +23,27 @@ public class View {
     public View() { }
 
     /**
-     * Loads the students in the class.
+     * Gets a class from the database. This typically means that we will have the teacher id,
+     * and all the students in the class.
+     * @param classId the class id of the class we wish to receive.
      * @param onSuccessListener what to do with the students info
      * @param onFailureListener if it fails, what should happen
      */
-    public void getStudents(final OnSuccessListener<ArrayList<Student>> onSuccessListener,
-                            OnFailureListener onFailureListener) {
+    public void getClass(final String classId,
+                            final OnSuccessListener<Class> onSuccessListener,
+                            final OnFailureListener onFailureListener) {
 
-        CollectionReference studentsRef = db.collection("students");
+        db.collection("classes")
+                .document(classId).get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
 
-        studentsRef
-            .get()
-            .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                @Override
-                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                    ArrayList<Student> students = new ArrayList<>();
-                    for (QueryDocumentSnapshot docSnapshot : queryDocumentSnapshots) {
-                        try {
-                            Student student = Student.fromSnapshot(docSnapshot);
-                            students.add(student);
-                        } catch (NullPointerException exc) {
-                            Log.e(TAG, "Error parsing student", exc);
-                        }
+                        Class m_class = Class.fromSnapshot(documentSnapshot);
+                        onSuccessListener.onSuccess(m_class);
                     }
-                    onSuccessListener.onSuccess(students);
-                }
-            }).addOnFailureListener(onFailureListener);
+                })
+                .addOnFailureListener(onFailureListener);
     }
 
     /**
@@ -86,15 +81,17 @@ public class View {
 
     /**
      * Loads the id's of all the sessions that have taken place in chronological order by start time
+     * @param classId the class id of the class that we wish to get the sessions for
      * @param onSuccessListener the callback for when we get this info
      * @param onFailureListener the callback for failing to get the info
      */
-    public void getSessions(final OnSuccessListener<ArrayList<ClassSession>> onSuccessListener,
+    public void getSessions(final String classId,
+                            final OnSuccessListener<ArrayList<ClassSession>> onSuccessListener,
                             OnFailureListener onFailureListener) {
 
-        CollectionReference sessionsRef = db.collection("sessions");
-
-        sessionsRef
+        db.collection("classes")
+                .document(classId)
+                .collection("sessions")
                 .orderBy("startTime")
                 .get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -117,15 +114,19 @@ public class View {
     /**
      * Loads the session info for a provided session. The id for the session must be provided.
      * Using this info it pulls the attendance for that specific session
+     * @param classId the class id of the class that we wish to get the session attendance for
      * @param session the session that we are interested in getting the attendance for
      * @param onSuccessListener the callback for getting this information
      * @param onFailureListener the failure callback for this info
      */
-    public void getSessionAttendance(final ClassSession session,
+    public void getSessionAttendance(final String classId,
+                                     final ClassSession session,
                                      final OnSuccessListener<ArrayList<Attendee>> onSuccessListener,
                                      OnFailureListener onFailureListener) {
 
-        CollectionReference attendeesCollection = db.collection("sessions")
+        CollectionReference attendeesCollection = db.collection("classes")
+                .document(classId)
+                .collection("sessions")
                 .document(session.getId())
                 .collection(ClassSession.ATTENDEES);
 
@@ -146,16 +147,23 @@ public class View {
 
     /**
      * Used by students to wait until they are marked present by their teacher.
-     * @param courseId
-     * @param studentId
-     * @param eventListener
-     * @return
+     * @param classId the class id of the class that we want to listen on
+     * @param courseId the id of the session that we wish to listen on
+     * @param studentId the id of the student that we are interested in
+     * @param eventListener the callback for what should happen when we receive an update on this
+     *                      student
+     * @return the listener registration so that the caller can cancel the listener
      */
-    public ListenerRegistration listenForMarking(String courseId,
+    public ListenerRegistration listenForMarking(String classId,
+                                                 String courseId,
                                                  String studentId,
                                                  EventListener<DocumentSnapshot> eventListener) {
 
-        final DocumentReference docRef = db.collection("sessions/ " + courseId + "/attendees").document(studentId);
+        final DocumentReference docRef = db.collection("classes")
+                .document(classId)
+                .collection("sessions/ " + courseId + "/attendees")
+                .document(studentId);
+
         return docRef.addSnapshotListener(eventListener);
 
     }

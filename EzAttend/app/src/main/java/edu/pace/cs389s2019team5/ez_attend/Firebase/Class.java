@@ -1,7 +1,9 @@
 package edu.pace.cs389s2019team5.ez_attend.Firebase;
 
-import java.util.ArrayList;
+import com.google.firebase.firestore.DocumentSnapshot;
+
 import java.util.Iterator;
+import java.util.List;
 
 public class Class {
 
@@ -10,9 +12,9 @@ public class Class {
 
     private String id;
     private String teacherId;
-    private ArrayList<String> studentIds;
+    private List<String> studentIds;
 
-    public Class(String id, String teacherId, ArrayList<String> studentIds) {
+    public Class(String id, String teacherId, List<String> studentIds) {
         this.id = id;
         this.teacherId = teacherId;
         this.studentIds = studentIds;
@@ -53,6 +55,20 @@ public class Class {
     @Override
     public int hashCode() {
         return id.hashCode();
+    }
+
+    /**
+     * Generates a class object from a document snapshot
+     * @param snapshot the document snapshot generally returned by calls to firebase
+     * @return the newly created class object
+     */
+    public static Class fromSnapshot(DocumentSnapshot snapshot) {
+
+        String id = snapshot.getId();
+        String teacherId = snapshot.getString("teacherId");
+        List<String> students = (List<String>) snapshot.get("students");
+
+        return new Class(id, teacherId, students);
     }
 
 }
