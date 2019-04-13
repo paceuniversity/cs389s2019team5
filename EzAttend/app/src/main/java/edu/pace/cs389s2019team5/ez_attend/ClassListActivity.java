@@ -13,14 +13,24 @@ import android.view.MenuItem;
 import edu.pace.cs389s2019team5.ez_attend.ClassListFragments.RecentFragment;
 import edu.pace.cs389s2019team5.ez_attend.ClassListFragments.StudentFragment;
 import edu.pace.cs389s2019team5.ez_attend.ClassListFragments.TeacherFragment;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Student;
 
 public class ClassListActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private final static String TAG = ClassListActivity.class.getName();
+    public final static String CURRENT_USER_TAG = "user";
+
+    // Stores the information for the currently signed in user
+    private Student currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_class_list);
+
+        this.currentUser = getIntent().getParcelableExtra(CURRENT_USER_TAG);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
