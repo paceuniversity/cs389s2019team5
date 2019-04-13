@@ -8,6 +8,7 @@
     android:background="@color/mainBackground"
     tools:context=".MainActivity">
 
+    <!-- TODO MAKE THIS A MORE APPROPRIATE LAUNCHER PAGE -->
 
     <TextView
         android:id="@+id/menuBarMain"
@@ -30,7 +31,6 @@
         android:layout_marginRight="10dp"
         android:background="@drawable/appleborder"
         android:gravity="center_vertical"
-        android:onClick="openTeacherActivity"
         android:paddingLeft="10dp"
         android:text="@string/teacher"
         android:textAppearance="@style/TextAppearance.AppCompat.Display2"
@@ -51,7 +51,6 @@
         android:layout_marginRight="10dp"
         android:background="@drawable/capborder"
         android:gravity="center_vertical"
-        android:onClick="launchStudent"
         android:paddingLeft="10dp"
         android:text="@string/student"
         android:textAppearance="@style/TextAppearance.AppCompat.Display2"
