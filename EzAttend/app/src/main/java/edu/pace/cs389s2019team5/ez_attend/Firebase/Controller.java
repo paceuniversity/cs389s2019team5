@@ -21,18 +21,28 @@ public class Controller {
     private final static String TAG = Controller.class.getName();
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+    public final static String DEBUG_CLASS_ID = "123";
+    public final static String DEBUG_TEACHER_ID = "478";
+
     /**
      * Creates a new class session on firebase so that the class attendance can begin
      * getting recorded.
+     * @param classId the id of the class that we wish to create a new session for
      * @param successListener what should be done when the creation of the class session was successful.
      *                        A class session will be passed which can be used to get the id and timestamp
+     * @param failureListener the callback if there is some sort of error when attempting to create
+     *                        a new class session
      */
-    public void beginClassSession(final OnSuccessListener<String> successListener, final OnFailureListener failureListener) {
+    public void beginClassSession(final String classId,
+                                  final OnSuccessListener<String> successListener,
+                                  final OnFailureListener failureListener) {
 
         Map<String, Object> session = new HashMap<>();
         session.put("startTime", FieldValue.serverTimestamp());
 
-        db.collection("sessions")
+        db.collection("classes")
+                .document(classId)
+                .collection("sessions")
                 .add(session)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
@@ -43,6 +53,55 @@ public class Controller {
                     }
                 })
                 .addOnFailureListener(failureListener);
+    }
+
+    /**
+     * Creates a new class on firebase, with the provided teacher id as the teacher.
+     * @param teacherId the id of the teacher that is creating the class
+     * @param successListener what should be done when the creation of the class session was successful.
+     *                        The id for the newly created class will be passed
+     * @param failureListener the callback when there is an error creating the class
+     */
+    public void createClass(String teacherId,
+                            final OnSuccessListener<String> successListener,
+                            final OnFailureListener failureListener) {
+
+        Map<String, Object> classMap = new HashMap<>();
+        classMap.put("teacherId", teacherId);
+
+        db.collection("classes")
+                .add(classMap)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.i(TAG, "Class successfully created");
+                        successListener.onSuccess(documentReference.getId());
+
+                    }
+                })
+                .addOnFailureListener(failureListener);
+
+    }
+
+    /**
+     * Adds a student to a specific class that is given
+     * @param classId the id of the class that the student would like to join
+     * @param studentId the id of the student that would like to join the class
+     * @param successListener the callback if the student was successfully added to the class
+     * @param failureListener the callback if the student couldn't join the class. This could mean
+     *                        the class doesn't exist
+     */
+    public void joinClass(String classId,
+                          String studentId,
+                          OnSuccessListener<Void> successListener,
+                          OnFailureListener failureListener) {
+
+        DocumentReference classReference = db.collection("classes").document(classId);
+
+        classReference.update("students", FieldValue.arrayUnion(studentId))
+                .addOnSuccessListener(successListener)
+                .addOnFailureListener(failureListener);
+
     }
 
     /**
@@ -57,10 +116,19 @@ public class Controller {
     /**
      * Given the id of the student, should mark present in the most recent class session if the student
      * is not already marked
+     * @param classId the id of the class we wish to be marked present for
+     * @param studentId the id of the student being marked present
+     * @param onSuccessListener the callback if the marking was successful
+     * @param onFailureListener the callback if there was an error marking the student present
      */
-    public void markPresent(final String id, final OnSuccessListener<Void> onSuccessListener, final OnFailureListener onFailureListener) {
+    public void markPresent(final String classId,
+                            final String studentId,
+                            final OnSuccessListener<Void> onSuccessListener,
+                            final OnFailureListener onFailureListener) {
 
-        db.collection("sessions")
+        db.collection("classes")
+                .document(classId)
+                .collection("sessions")
                 .orderBy("startTime", Query.Direction.DESCENDING)
                 .limit(1)
                 .get()
@@ -77,8 +145,10 @@ public class Controller {
                         }
                         final DocumentSnapshot sessionSnapShot = (DocumentSnapshot) list.get(0);
 
-                        db.collection("sessions/" + sessionSnapShot.getId() + "/attendees")
-                                .document(id).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        db.collection("classes")
+                                .document(classId)
+                                .collection("sessions/" + sessionSnapShot.getId() + "/attendees")
+                                .document(studentId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                             @Override
                             public void onSuccess(DocumentSnapshot studentSnapshot) {
                                 if (studentSnapshot.exists() && studentSnapshot.get("timeStamp") != null) {
@@ -91,8 +161,10 @@ public class Controller {
                                     userTimeStamp.put("timeStamp", FieldValue.serverTimestamp());
 
                                     Log.i(TAG, "Marking student present for most recent session");
-                                    db.collection("sessions/" + sessionSnapShot.getId() + "/attendees")
-                                            .document(id).set(userTimeStamp).addOnSuccessListener(onSuccessListener).addOnFailureListener(onFailureListener);
+                                    db.collection("classes")
+                                            .document(classId)
+                                            .collection("sessions/" + sessionSnapShot.getId() + "/attendees")
+                                            .document(studentId).set(userTimeStamp).addOnSuccessListener(onSuccessListener).addOnFailureListener(onFailureListener);
                                 }
                             }
                         }).addOnFailureListener(new OnFailureListener() {
@@ -120,15 +192,19 @@ public class Controller {
      * As opposed to markPresent which is used by a student to mark themselves present, this adds
      * a new field to the document called teacherTimestamp which marks when the teacher device
      * detected the student.
-     * @param id the id of the student that the teacher wishes to mark present
+     * @param classId the id of the class that the teacher is marking the student present for
+     * @param studentId the id of the student that the teacher wishes to mark present
      * @param onSuccessListener the callback when the student is successfully marked present
      * @param onFailureListener the callback when marking the student present fails
      */
-    public void teacherMarkPresent(final String id,
+    public void teacherMarkPresent(final String classId,
+                                   final String studentId,
                                    final OnSuccessListener<Void> onSuccessListener,
                                    final OnFailureListener onFailureListener) {
 
-        db.collection("sessions")
+        db.collection("classes")
+                .document(classId)
+                .collection("sessions")
                 .orderBy("startTime", Query.Direction.DESCENDING)
                 .limit(1)
                 .get()
@@ -145,8 +221,10 @@ public class Controller {
                         }
                         final DocumentSnapshot sessionSnapShot = (DocumentSnapshot) list.get(0);
 
-                        db.collection("sessions/" + sessionSnapShot.getId() + "/attendees")
-                                .document(id).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        db.collection("classes")
+                                .document(classId)
+                                .collection("sessions/" + sessionSnapShot.getId() + "/attendees")
+                                .document(studentId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                             @Override
                             public void onSuccess(DocumentSnapshot studentSnapshot) {
                                 if (studentSnapshot.exists() && studentSnapshot.get("teacherTimestamp") != null) {
@@ -159,8 +237,10 @@ public class Controller {
                                     userTimeStamp.put("teacherTimestamp", FieldValue.serverTimestamp());
 
                                     Log.i(TAG, "Marking student present for most recent session");
-                                    db.collection("sessions/" + sessionSnapShot.getId() + "/attendees")
-                                            .document(id).set(userTimeStamp)
+                                    db.collection("classes")
+                                            .document(classId)
+                                            .collection("sessions/" + sessionSnapShot.getId() + "/attendees")
+                                            .document(studentId).set(userTimeStamp)
                                             .addOnSuccessListener(onSuccessListener)
                                             .addOnFailureListener(onFailureListener);
                                 }
