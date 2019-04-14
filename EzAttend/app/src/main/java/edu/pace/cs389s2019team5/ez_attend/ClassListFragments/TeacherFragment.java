@@ -19,7 +19,10 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import edu.pace.cs389s2019team5.ez_attend.ClassFragments.TeacherClassFragment;
@@ -49,7 +52,38 @@ public class TeacherFragment extends Fragment {
                 addClass();
             }
         });
-        this.adapter.startListening();
+
+
+
+        FirebaseFirestore.getInstance().collection("classes").whereEqualTo("teacherId",this.user).get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        ArrayList<String> ids = new ArrayList<>();
+                        for (QueryDocumentSnapshot docSnapshot : queryDocumentSnapshots) {
+                            try {
+                                ids.add(docSnapshot.getId());
+                            } catch (NullPointerException exc) {
+                                Log.e(TAG, "Error parsing session", exc);
+                            }
+                        }
+                        Log.i(TAG, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"+ids.size());
+                        Log.i(TAG, "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"+ids.get(0));
+                        Log.i(TAG, "cccccccccccccccccccccccccccccccccccccccc"+ids.get(1));
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.i(TAG, "Couldn't check if student exists");
+            }
+        });
+
+
+
+
+
+
+
         return v;
     }
 
@@ -57,9 +91,9 @@ public class TeacherFragment extends Fragment {
         Query query = FirebaseFirestore.getInstance().collection("classes").whereEqualTo("teacherId",this.user);
         FirestoreRecyclerOptions<Class> options = new FirestoreRecyclerOptions.Builder<Class>().setQuery(query, Class.class).build();
 
-        this.adapter = new FirestoreRecyclerAdapter<Class, ClassHolder>(options) {
+        this.adapter = new FirestoreRecyclerAdapter<Class, TeacherFragment.ClassHolder>(options) {
             @Override
-            public void onBindViewHolder(ClassHolder holder, int position, final Class model) {
+            public void onBindViewHolder(TeacherFragment.ClassHolder holder, int position, final Class model) {
                 Button classSelection = holder.classSelection;
                 classSelection.setText(model.getId());
 
@@ -68,10 +102,6 @@ public class TeacherFragment extends Fragment {
                 Toast.makeText(getActivity().getApplicationContext(),
                         "Id: " + model.getId(),
                         Toast.LENGTH_SHORT).show();
-
-
-
-
 
                 Drawable a = getResources().getDrawable(R.drawable.fui_idp_button_background_anonymous);
                 Drawable b = getResources().getDrawable(R.drawable.fui_idp_button_background_email);
@@ -91,9 +121,9 @@ public class TeacherFragment extends Fragment {
             }
 
             @Override
-            public ClassHolder onCreateViewHolder(ViewGroup group, int i) {
+            public TeacherFragment.ClassHolder onCreateViewHolder(ViewGroup group, int i) {
                 View view = LayoutInflater.from(group.getContext()).inflate(R.layout.holder_class, group, false);
-                return new ClassHolder(view);
+                return new TeacherFragment.ClassHolder(view);
             }
         };
     }
@@ -127,7 +157,17 @@ public class TeacherFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        this.adapter.startListening();
+    }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        this.adapter.stopListening();
+    }
 
 
     public class ClassHolder extends RecyclerView.ViewHolder {

@@ -24,20 +24,27 @@ import edu.pace.cs389s2019team5.ez_attend.R;
 
 public class StudentFragment extends Fragment {
 
-
+    private static final String TAG = StudentFragment.class.getName();
+    private String user;
+    private FirestoreRecyclerAdapter adapter;
     public StudentFragment() {
-        // Required empty public constructor
+        this.user = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        createAdapter();
     }
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        String user = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        Query query = FirebaseFirestore.getInstance().collection("classes").whereArrayContains("students",user);
+        View v = inflater.inflate(R.layout.fragment_student, container, false);
+        return v;
+    }
+
+    private void createAdapter() {
+        Query query = FirebaseFirestore.getInstance().collection("classes").whereArrayContains("students",this.user);
         FirestoreRecyclerOptions<Class> options = new FirestoreRecyclerOptions.Builder<Class>().setQuery(query, Class.class).build();
 
-        FirestoreRecyclerAdapter adapter = new FirestoreRecyclerAdapter<Class, StudentFragment.ClassHolder>(options) {
+        this.adapter = new FirestoreRecyclerAdapter<Class, StudentFragment.ClassHolder>(options) {
             @Override
             public void onBindViewHolder(StudentFragment.ClassHolder holder, int position, final Class model) {
                 Button classSelection = holder.classSelection;
@@ -66,10 +73,8 @@ public class StudentFragment extends Fragment {
                 return new StudentFragment.ClassHolder(view);
             }
         };
-
-        adapter.startListening();
-        return inflater.inflate(R.layout.fragment_student, container, false);
     }
+
 
     public void openClass(String classID) {
         StudentClassFragment fragment = new StudentClassFragment();
@@ -77,6 +82,21 @@ public class StudentFragment extends Fragment {
         bundle.putString("classID", classID);
         getFragmentManager().beginTransaction().replace(R.id.fragment_content, fragment).commit();
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        this.adapter.startListening();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        this.adapter.stopListening();
+    }
+
+
+
     public class ClassHolder extends RecyclerView.ViewHolder {
         public Button classSelection;
         public ClassHolder(View itemView) {
