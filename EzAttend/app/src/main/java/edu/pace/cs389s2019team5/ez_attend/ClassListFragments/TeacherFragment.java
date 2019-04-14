@@ -2,15 +2,20 @@ package edu.pace.cs389s2019team5.ez_attend.ClassListFragments;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -19,22 +24,23 @@ import java.util.Random;
 
 import edu.pace.cs389s2019team5.ez_attend.ClassFragments.TeacherClassFragment;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
 import edu.pace.cs389s2019team5.ez_attend.R;
 
 
 public class TeacherFragment extends Fragment {
 
-
+    private static final String TAG = TeacherFragment.class.getName();
+    private String user;
     public TeacherFragment() {
-        // Required empty public constructor
+        this.user = FirebaseAuth.getInstance().getCurrentUser().getUid();
     }
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        String user = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        Query query = FirebaseFirestore.getInstance().collection("chats").whereEqualTo("teacherId",user);
+        Query query = FirebaseFirestore.getInstance().collection("chats").whereEqualTo("teacherId",this.user);
         FirestoreRecyclerOptions<Class> options = new FirestoreRecyclerOptions.Builder<Class>().setQuery(query, Class.class).build();
 
         FirestoreRecyclerAdapter adapter = new FirestoreRecyclerAdapter<Class, ClassHolder>(options) {
@@ -69,12 +75,16 @@ public class TeacherFragment extends Fragment {
 
         adapter.startListening();
 
-//        Button addClass = v.findViewById(R.id.addClassButton);
-//        addClass.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View v) {
-//                addClass();
-//            }
-//        });
+        View v = inflater.inflate(R.layout.fragment_teacher, container, false);
+        Button addClass = v.findViewById(R.id.addClassButton);
+        addClass.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Toast.makeText(getActivity().getApplicationContext(),
+                        "toast",
+                        Toast.LENGTH_SHORT).show();
+                addClass();
+            }
+        });
 
 
         return inflater.inflate(R.layout.fragment_teacher, container, false);
@@ -86,6 +96,32 @@ public class TeacherFragment extends Fragment {
         bundle.putString("classID", classID);
         getFragmentManager().beginTransaction().replace(R.id.fragment_content, fragment).commit();
     }
+
+
+    public void addClass() {
+        Controller newClass = new Controller();
+        newClass.createClass(this.user, new OnSuccessListener<String>() {
+            @Override
+            public void onSuccess(String classId) {
+                Toast.makeText(getActivity().getApplicationContext(),
+                        "New class created with Id: " + classId,
+                        Toast.LENGTH_SHORT).show();
+                Log.i(TAG, "Successfully taking attendance");
+            }
+        }, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(getActivity().getApplicationContext(),
+                        "Failed to create class",
+                        Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Error when attempting to begin attendance", e);
+            }
+        });
+    }
+
+
+
+
     public class ClassHolder extends RecyclerView.ViewHolder {
         public Button classSelection;
         public ClassHolder(View itemView) {
