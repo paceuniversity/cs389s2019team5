@@ -13,12 +13,16 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
-import java.util.ArrayList;
 
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Attendee;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.ClassSession;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
 
@@ -35,96 +39,75 @@ public class StudentClassActivity extends AppCompatActivity {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
 
-    public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
+    public class SessionAttendanceAdapter extends FirestoreRecyclerAdapter<ClassSession, SessionViewHolder> {
 
-        private ArrayList<ClassSession> m_classSessions;
-        private Attendee[] attendees;
-
-        public MyAdapter(ArrayList<ClassSession> classSessions) {
-            if (classSessions != null) {
-                this.m_classSessions = classSessions;
-                this.attendees = new Attendee[classSessions.size()];
-            } else {
-                Log.e(TAG, "Cannot create a new adapter with null data");
-            }
+        public SessionAttendanceAdapter(@NonNull FirestoreRecyclerOptions<ClassSession> options) {
+            super(options);
         }
 
-        public class MyViewHolder extends RecyclerView.ViewHolder {
+        @Override
+        protected void onBindViewHolder(@NonNull final SessionViewHolder holder,
+                                        final int position,
+                                        @NonNull final ClassSession model) {
 
-            private TextView m_sessionTime;
-            private TextView m_sessionStatus;
+            Log.d(TAG, "Binding view holder");
+            holder.m_sessionTime.setText(model.getStartTime().toString());
 
-            public MyViewHolder(@NonNull View itemView) {
-                super(itemView);
+            // This caches the result in attendees so it doesn't reload every time the user
+            // scrolls through the attendance records
 
-                this.m_sessionTime = itemView.findViewById(R.id.txtSessionStartTime);
-                this.m_sessionStatus = itemView.findViewById(R.id.txtSessionAttendanceStatus);
+            // todo add this to the strings resources file
+            holder.m_sessionStatus.setText("Loading...");
 
-            }
+            edu.pace.cs389s2019team5.ez_attend.Firebase.View view = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
+
+            view.getAttendee(classId,
+                    model.getId(),
+                    StudentClassActivity.this.studentId,
+                    new OnSuccessListener<Attendee>() {
+                        @Override
+                        public void onSuccess(Attendee attendee) {
+                            if (attendee == null) {
+                                holder.m_sessionStatus.setText(R.string.attendance_absent);
+                            } else {
+                                // Before modifying the content of the adapter, we should make
+                                // sure it is still holding the right data
+                                if (holder.getAdapterPosition() == position)
+                                    // This is equivalent to 10 minutes
+                                    holder.m_sessionStatus.setText(
+                                            attendee.getAttendeeStatus(StudentClassActivity.this,
+                                                    model.getStartTime(),
+                                                    600000));
+                            }
+                        }
+                    }, new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e(TAG, "Error adding to view holder", e);
+                        }
+                    });
+
         }
 
         @NonNull
         @Override
-        public MyAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+        public SessionViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
             View view = LayoutInflater.from(viewGroup.getContext())
                     .inflate(R.layout.student_attendance_item_view, viewGroup, false);
-            return new MyViewHolder(view);
+            return new SessionViewHolder(view);
         }
+    }
 
-        @Override
-        public void onBindViewHolder(@NonNull final MyAdapter.MyViewHolder myViewHolder, final int i) {
+    public class SessionViewHolder extends RecyclerView.ViewHolder {
 
-            final ClassSession session = this.m_classSessions.get(i);
+        private TextView m_sessionTime;
+        private TextView m_sessionStatus;
 
-            myViewHolder.m_sessionTime.setText(session.getStartTime().toString());
+        public SessionViewHolder(@NonNull View itemView) {
+            super(itemView);
 
-            // This caches the result in attendees so it doesn't reload every time the user
-            // scrolls through the attendance records
-            if (attendees[i] != null) {
-                String status = attendees[i].getAttendeeStatus(StudentClassActivity.this,
-                        session.getStartTime(),
-                        60000);
-                myViewHolder.m_sessionStatus.setText(status);
-            } else {
-                // todo add this to the strings resources file
-                myViewHolder.m_sessionStatus.setText("Loading...");
-
-                edu.pace.cs389s2019team5.ez_attend.Firebase.View view = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
-
-                view.getAttendee(classId,
-                        session.getId(),
-                        studentId,
-                        new OnSuccessListener<Attendee>() {
-                            @Override
-                            public void onSuccess(Attendee attendee) {
-                                if (attendee == null) {
-                                    myViewHolder.m_sessionStatus.setText(R.string.attendance_absent);
-                                } else {
-                                    // cache the result for this attendee
-                                    attendees[i] = attendee;
-
-                                    // Before modifying the content of the adapter, we should make
-                                    // sure it is still holding the right data
-                                    if (myViewHolder.getAdapterPosition() == i)
-                                        // This is equivalent to 10 minutes
-                                        myViewHolder.m_sessionStatus.setText(
-                                                attendee.getAttendeeStatus(StudentClassActivity.this,
-                                                        session.getStartTime(),
-                                                        600000));
-                                }
-                            }
-                        }, new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.e(TAG, "Error adding to view holder", e);
-                            }
-                        });
-            }
-        }
-
-        @Override
-        public int getItemCount() {
-            return m_classSessions.size();
+            this.m_sessionTime = itemView.findViewById(R.id.txtSessionStartTime);
+            this.m_sessionStatus = itemView.findViewById(R.id.txtSessionAttendanceStatus);
         }
 
     }
@@ -149,28 +132,20 @@ public class StudentClassActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
 
         layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
 
-        // Load the data from the view
-        edu.pace.cs389s2019team5.ez_attend.Firebase.View view = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
-        view.getSessions(this.classId,
-                new OnSuccessListener<ArrayList<ClassSession>>() {
-                    @Override
-                    public void onSuccess(ArrayList<ClassSession> classSessions) {
-                        if (classSessions != null) {
-                            StudentClassActivity.this.mAdapter = new MyAdapter(classSessions);
-                            StudentClassActivity.this.recyclerView
-                                    .setAdapter(StudentClassActivity.this.mAdapter);
-                            Log.i(TAG, "Set the adapter for the recycler view");
-                        }
-                    }
-                },
-                new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "Couldn't load the student attendance data", e);
-                    }
-                });
+        Query query = FirebaseFirestore.getInstance()
+                .collection("classes")
+                .document(classId)
+                .collection(Class.SESSIONS)
+                .orderBy("startTime", Query.Direction.DESCENDING);
+
+        FirestoreRecyclerOptions<ClassSession> options = new FirestoreRecyclerOptions.Builder<ClassSession>()
+                .setQuery(query, ClassSession.SNAPSHOTPARSER)
+                .build();
+
+        this.mAdapter = new SessionAttendanceAdapter(options);
+        this.recyclerView.setLayoutManager(layoutManager);
+        this.recyclerView.setAdapter(this.mAdapter);
 
     }
 
@@ -194,4 +169,17 @@ public class StudentClassActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        ((FirestoreRecyclerAdapter) this.mAdapter).startListening();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        ((FirestoreRecyclerAdapter) this.mAdapter).stopListening();
+    }
+
 }
