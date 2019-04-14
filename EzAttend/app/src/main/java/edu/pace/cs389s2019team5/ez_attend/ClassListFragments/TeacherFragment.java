@@ -20,10 +20,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 import edu.pace.cs389s2019team5.ez_attend.ClassFragments.TeacherClassFragment;
@@ -64,19 +61,13 @@ public class TeacherFragment extends Fragment {
 
     private void createAdapter() {
         Query query = FirebaseFirestore.getInstance().collection("classes").whereEqualTo("teacherId",this.user);
-        FirestoreRecyclerOptions<Class> options = new FirestoreRecyclerOptions.Builder<Class>().setQuery(query, Class.class).build();
+        FirestoreRecyclerOptions<Class> options = new FirestoreRecyclerOptions.Builder<Class>().setQuery(query, Class.SNAPSHOTPARSER).build();
 
         this.adapter = new FirestoreRecyclerAdapter<Class, TeacherFragment.ClassHolder>(options) {
             @Override
             public void onBindViewHolder(TeacherFragment.ClassHolder holder, int position, final Class model) {
                 Button classSelection = holder.classSelection;
                 classSelection.setText(model.getId());
-
-
-                Log.i(TAG, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"+model.getId());
-                Toast.makeText(getActivity().getApplicationContext(),
-                        "Id: " + model.getId(),
-                        Toast.LENGTH_SHORT).show();
 
                 Drawable a = getResources().getDrawable(R.drawable.fui_idp_button_background_anonymous);
                 Drawable b = getResources().getDrawable(R.drawable.fui_idp_button_background_email);

@@ -17,7 +17,6 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
 import edu.pace.cs389s2019team5.ez_attend.R;
-import edu.pace.cs389s2019team5.ez_attend.StudentClassActivity;
 
 /**
  * A simple {@link Fragment} subclass.
