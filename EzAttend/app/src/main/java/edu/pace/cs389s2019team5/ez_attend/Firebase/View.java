@@ -146,6 +146,48 @@ public class View {
     }
 
     /**
+     * Gets the attendee information for a student in a given class and for a given session. This
+     * is useful for understanding if the student attended the given session and if so, their
+     * time of arrival.
+     * @param classId the id for the class that we are interested in testing for
+     * @param sessionId the id for the session of interest. The session id should be part of the
+     *                  class with the given class id
+     * @param attendeeId the attendee id. It is assumed that this student id is in fact a student
+     *                   of the given class
+     * @param onSuccessListener the callback if successful. This returns the attendee object if the
+     *                          student did in fact attend this session or null if they were absent
+     * @param onFailureListener the callback if there is any issue getting the student information.
+     *                          This could be because we are not connected to the network
+     */
+    public void getAttendee(final String classId,
+                            final String sessionId,
+                            final String attendeeId,
+                            final OnSuccessListener<Attendee> onSuccessListener,
+                            final OnFailureListener onFailureListener) {
+
+        Log.i(TAG, "Getting stuff for " + attendeeId);
+        db.collection("classes")
+                .document(classId)
+                .collection(Class.SESSIONS)
+                .document(sessionId)
+                .collection(ClassSession.ATTENDEES)
+                .document(attendeeId)
+                .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot snapshot) {
+                // Convert the given snapshot to an attendee object
+                if (snapshot.exists()) {
+                    Attendee attendee = Attendee.fromSnapshot(snapshot);
+                    onSuccessListener.onSuccess(attendee);
+                } else {
+                    onSuccessListener.onSuccess(null);
+                }
+            }
+        }).addOnFailureListener(onFailureListener);
+
+    }
+
+    /**
      * Used by students to wait until they are marked present by their teacher.
      * @param classId the class id of the class that we want to listen on
      * @param courseId the id of the session that we wish to listen on
