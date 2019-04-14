@@ -46,13 +46,11 @@ public class TeacherFragment extends Fragment {
                 Drawable a = getResources().getDrawable(R.drawable.fui_idp_button_background_anonymous);
                 Drawable b = getResources().getDrawable(R.drawable.fui_idp_button_background_email);
                 Drawable c = getResources().getDrawable(R.drawable.fui_idp_button_background_facebook);
-                Drawable d = getResources().getDrawable(R.drawable.fui_idp_button_background_github);
-                Drawable e = getResources().getDrawable(R.drawable.fui_idp_button_background_google);
                 Drawable f = getResources().getDrawable(R.drawable.fui_idp_button_background_phone);
                 Drawable g = getResources().getDrawable(R.drawable.fui_idp_button_background_twitter);
-                Drawable[] arr = {a,b,c,d,e,f,g};
+                Drawable[] arr = {a,b,c,f,g};//d and e were scrapped
                 Random rand = new Random();
-                int num = rand.nextInt(7);//background could be changed from random to choose depending on class name
+                int num = rand.nextInt(5);//background could be changed from random to choose depending on class name
 
                 classSelection.setBackground(arr[num]);
                 classSelection.setOnClickListener(new View.OnClickListener() {
@@ -70,6 +68,14 @@ public class TeacherFragment extends Fragment {
         };
 
         adapter.startListening();
+
+//        Button addClass = v.findViewById(R.id.addClassButton);
+//        addClass.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View v) {
+//                addClass();
+//            }
+//        });
+
 
         return inflater.inflate(R.layout.fragment_teacher, container, false);
     }
