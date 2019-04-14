@@ -34,7 +34,7 @@ public class StudentFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         String user = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        Query query = FirebaseFirestore.getInstance().collection("chats").whereArrayContains("students",user);
+        Query query = FirebaseFirestore.getInstance().collection("classes").whereArrayContains("students",user);
         FirestoreRecyclerOptions<Class> options = new FirestoreRecyclerOptions.Builder<Class>().setQuery(query, Class.class).build();
 
         FirestoreRecyclerAdapter adapter = new FirestoreRecyclerAdapter<Class, StudentFragment.ClassHolder>(options) {

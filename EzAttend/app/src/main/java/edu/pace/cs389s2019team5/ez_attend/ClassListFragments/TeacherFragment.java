@@ -32,22 +32,46 @@ public class TeacherFragment extends Fragment {
 
     private static final String TAG = TeacherFragment.class.getName();
     private String user;
+    private FirestoreRecyclerAdapter adapter;
     public TeacherFragment() {
         this.user = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        createAdapter();
     }
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Query query = FirebaseFirestore.getInstance().collection("chats").whereEqualTo("teacherId",this.user);
+        View v = inflater.inflate(R.layout.fragment_teacher, container, false);
+        Button addClass = v.findViewById(R.id.addClassButton);
+        addClass.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                addClass();
+            }
+        });
+        this.adapter.startListening();
+        return v;
+    }
+
+    private void createAdapter() {
+        Query query = FirebaseFirestore.getInstance().collection("classes").whereEqualTo("teacherId",this.user);
         FirestoreRecyclerOptions<Class> options = new FirestoreRecyclerOptions.Builder<Class>().setQuery(query, Class.class).build();
 
-        FirestoreRecyclerAdapter adapter = new FirestoreRecyclerAdapter<Class, ClassHolder>(options) {
+        this.adapter = new FirestoreRecyclerAdapter<Class, ClassHolder>(options) {
             @Override
             public void onBindViewHolder(ClassHolder holder, int position, final Class model) {
                 Button classSelection = holder.classSelection;
                 classSelection.setText(model.getId());
+
+
+                Log.i(TAG, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"+model.getId());
+                Toast.makeText(getActivity().getApplicationContext(),
+                        "Id: " + model.getId(),
+                        Toast.LENGTH_SHORT).show();
+
+
+
+
 
                 Drawable a = getResources().getDrawable(R.drawable.fui_idp_button_background_anonymous);
                 Drawable b = getResources().getDrawable(R.drawable.fui_idp_button_background_email);
@@ -72,22 +96,6 @@ public class TeacherFragment extends Fragment {
                 return new ClassHolder(view);
             }
         };
-
-        adapter.startListening();
-
-        View v = inflater.inflate(R.layout.fragment_teacher, container, false);
-        Button addClass = v.findViewById(R.id.addClassButton);
-        addClass.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Toast.makeText(getActivity().getApplicationContext(),
-                        "toast",
-                        Toast.LENGTH_SHORT).show();
-                addClass();
-            }
-        });
-
-
-        return inflater.inflate(R.layout.fragment_teacher, container, false);
     }
 
     public void openClass(String classID) {
