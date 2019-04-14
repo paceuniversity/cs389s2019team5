@@ -11,13 +11,24 @@
         android:layout_height="wrap_content"
         android:paddingBottom="20dp">
 
-        <Button
-            android:id="@+id/joinClassButton"
-            style="@style/FirebaseUI.Button.AccountChooser.GitHubButton"
-            android:layout_width="312dp"
+        <EditText
+            android:id="@+id/classInput"
+            android:layout_width="156dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="50dp"
             android:layout_marginLeft="50dp"
+            android:layout_marginTop="20dp"
+            android:ems="10"
+            android:hint="@string/class_id"
+            android:inputType="text"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/joinClassButton"
+            style="@style/FirebaseUI.Button.AccountChooser.GitHubButton"
+            android:layout_width="147dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:layout_marginEnd="50dp"
             android:layout_marginRight="50dp"
@@ -26,7 +37,6 @@
             android:text="@string/join_class"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <android.support.v7.widget.RecyclerView

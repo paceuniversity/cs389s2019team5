@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
@@ -44,12 +45,14 @@ public class StudentFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_student, container, false);
+        final View v = inflater.inflate(R.layout.fragment_student, container, false);
         Button joinClass = v.findViewById(R.id.joinClassButton);
         joinClass.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                String tempClass = "trDCEnUDFTHQ8G9kbR3S";
-                joinClass(tempClass);
+            public void onClick(View view) {
+                EditText tempClassText = v.findViewById(R.id.classInput);
+                String classID = tempClassText.getText().toString().trim();
+                joinClass(classID);
+                tempClassText.setText("");
             }
         });
         createAdapter();
