@@ -1,5 +1,6 @@
 package edu.pace.cs389s2019team5.ez_attend.ClassListFragments;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
@@ -14,6 +15,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import java.util.Random;
+
+import edu.pace.cs389s2019team5.ez_attend.ClassFragments.TeacherClassFragment;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
 import edu.pace.cs389s2019team5.ez_attend.R;
 
@@ -38,6 +42,19 @@ public class TeacherFragment extends Fragment {
             public void onBindViewHolder(ClassHolder holder, int position, final Class model) {
                 Button classSelection = holder.classSelection;
                 classSelection.setText(model.getId());
+
+                Drawable a = getResources().getDrawable(R.drawable.fui_idp_button_background_anonymous);
+                Drawable b = getResources().getDrawable(R.drawable.fui_idp_button_background_email);
+                Drawable c = getResources().getDrawable(R.drawable.fui_idp_button_background_facebook);
+                Drawable d = getResources().getDrawable(R.drawable.fui_idp_button_background_github);
+                Drawable e = getResources().getDrawable(R.drawable.fui_idp_button_background_google);
+                Drawable f = getResources().getDrawable(R.drawable.fui_idp_button_background_phone);
+                Drawable g = getResources().getDrawable(R.drawable.fui_idp_button_background_twitter);
+                Drawable[] arr = {a,b,c,d,e,f,g};
+                Random rand = new Random();
+                int num = rand.nextInt(7);//background could be changed from random to choose depending on class name
+
+                classSelection.setBackground(arr[num]);
                 classSelection.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         openClass(model.getId());
@@ -58,9 +75,10 @@ public class TeacherFragment extends Fragment {
     }
 
     public void openClass(String classID) {
-        //selecting a class will open a new fragment such as: new TeacherClassFragment(String classID)
-
-        //getFragmentManager().beginTransaction().replace(R.id.fragment_content, new TeacherClassFragment(classID)).commit();
+        TeacherClassFragment fragment = new TeacherClassFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString("classID", classID);
+        getFragmentManager().beginTransaction().replace(R.id.fragment_content, fragment).commit();
     }
     public class ClassHolder extends RecyclerView.ViewHolder {
         public Button classSelection;
