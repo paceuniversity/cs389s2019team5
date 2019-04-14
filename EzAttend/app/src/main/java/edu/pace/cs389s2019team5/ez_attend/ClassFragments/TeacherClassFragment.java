@@ -35,9 +35,11 @@ public class TeacherClassFragment extends Fragment {
     private static final String TAG = TeacherClassFragment.class.getName();
     private String classID;
     public TeacherClassFragment() {
-        this.classID = getArguments().getString("classID");
-    }
 
+    }
+    public void setClass(String classID) {
+        this.classID = classID;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -84,7 +86,7 @@ public class TeacherClassFragment extends Fragment {
             @Override
             public void onSuccess(String sessionId) {
                 Toast.makeText(getActivity().getApplicationContext(),
-                        "New class created with Id: " + sessionId,
+                        "Successfully taking attendance: " + sessionId,
                         Toast.LENGTH_SHORT).show();
                 Log.i(TAG, "Successfully taking attendance");
             }

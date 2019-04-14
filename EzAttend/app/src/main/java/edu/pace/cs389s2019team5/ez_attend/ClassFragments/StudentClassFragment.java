@@ -26,9 +26,11 @@ public class StudentClassFragment extends Fragment {
     private static final String TAG = StudentClassFragment.class.getName();
     private String classID;
     public StudentClassFragment() {
-        this.classID = getArguments().getString("classID");
-    }
 
+    }
+    public void setClassID(String classID) {
+        this.classID = classID;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

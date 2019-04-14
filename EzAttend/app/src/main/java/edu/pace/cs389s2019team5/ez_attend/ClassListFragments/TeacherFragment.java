@@ -96,9 +96,8 @@ public class TeacherFragment extends Fragment {
 
     public void openClass(String classID) {
         TeacherClassFragment fragment = new TeacherClassFragment();
-        Bundle bundle = new Bundle();
-        bundle.putString("classID", classID);
-        getFragmentManager().beginTransaction().replace(R.id.fragment_content, fragment).commit();
+        fragment.setClass(classID);
+        getFragmentManager().beginTransaction().replace(R.id.fragment_content, fragment).addToBackStack(TAG).commit();
     }
 
 
