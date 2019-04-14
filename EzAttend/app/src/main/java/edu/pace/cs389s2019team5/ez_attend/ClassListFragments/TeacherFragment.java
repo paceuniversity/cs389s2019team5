@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,9 +37,10 @@ public class TeacherFragment extends Fragment {
     private static final String TAG = TeacherFragment.class.getName();
     private String user;
     private FirestoreRecyclerAdapter adapter;
+    private RecyclerView rv;
+    private RecyclerView.LayoutManager layoutManager;
     public TeacherFragment() {
         this.user = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        createAdapter();
     }
 
 
@@ -52,38 +54,11 @@ public class TeacherFragment extends Fragment {
                 addClass();
             }
         });
-
-
-
-        FirebaseFirestore.getInstance().collection("classes").whereEqualTo("teacherId",this.user).get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        ArrayList<String> ids = new ArrayList<>();
-                        for (QueryDocumentSnapshot docSnapshot : queryDocumentSnapshots) {
-                            try {
-                                ids.add(docSnapshot.getId());
-                            } catch (NullPointerException exc) {
-                                Log.e(TAG, "Error parsing session", exc);
-                            }
-                        }
-                        Log.i(TAG, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"+ids.size());
-                        Log.i(TAG, "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"+ids.get(0));
-                        Log.i(TAG, "cccccccccccccccccccccccccccccccccccccccc"+ids.get(1));
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.i(TAG, "Couldn't check if student exists");
-            }
-        });
-
-
-
-
-
-
-
+        createAdapter();
+        this.rv = v.findViewById(R.id.rvTeacher);
+        this.layoutManager = new LinearLayoutManager(this.getActivity());
+        this.rv.setLayoutManager(this.layoutManager);
+        this.rv.setAdapter(this.adapter);
         return v;
     }
 
