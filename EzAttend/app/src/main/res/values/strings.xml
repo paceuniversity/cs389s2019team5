@@ -26,6 +26,7 @@
     <string name="attendance_present">Present</string>
     <string name="attendance_late">Late</string>
     <string name="attendance_absent">Absent</string>
+    <string name="attendance_loading">Loading&#8230;</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
