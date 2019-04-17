@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
@@ -44,11 +45,14 @@ public class TeacherFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_teacher, container, false);
+        final View v = inflater.inflate(R.layout.fragment_teacher, container, false);
         Button addClass = v.findViewById(R.id.addClassButton);
         addClass.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                addClass();
+            public void onClick(View view) {
+                EditText tempClassText = v.findViewById(R.id.classNameInput);
+                String className = tempClassText.getText().toString().trim();
+                addClass(className);
+                tempClassText.setText("");
             }
         });
         createAdapter();
@@ -67,7 +71,7 @@ public class TeacherFragment extends Fragment {
             @Override
             public void onBindViewHolder(TeacherFragment.ClassHolder holder, int position, final Class model) {
                 Button classSelection = holder.classSelection;
-                classSelection.setText(model.getId());
+                classSelection.setText(model.getClassName());
 
                 Drawable a = getResources().getDrawable(R.drawable.fui_idp_button_background_anonymous);
                 Drawable b = getResources().getDrawable(R.drawable.fui_idp_button_background_email);
@@ -101,9 +105,10 @@ public class TeacherFragment extends Fragment {
     }
 
 
-    public void addClass() {
+    public void addClass(String className) {
         Controller newClass = new Controller();
-        newClass.createClass(this.user, new OnSuccessListener<String>() {
+        // TODO GET A CLASS NAME FROM THE TEACHER WHEN THEY WANT TO CREATE A CLASS...perhaps make another fragment for this??
+        newClass.createClass(this.user, className,new OnSuccessListener<String>() {
             @Override
             public void onSuccess(String classId) {
                 Toast.makeText(getActivity().getApplicationContext(),

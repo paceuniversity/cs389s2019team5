@@ -71,7 +71,7 @@ public class StudentFragment extends Fragment {
             @Override
             public void onBindViewHolder(StudentFragment.ClassHolder holder, int position, final Class model) {
                 Button classSelection = holder.classSelection;
-                classSelection.setText(model.getId());
+                classSelection.setText(model.getClassName());
 
                 Drawable a = getResources().getDrawable(R.drawable.fui_idp_button_background_anonymous);
                 Drawable b = getResources().getDrawable(R.drawable.fui_idp_button_background_email);
