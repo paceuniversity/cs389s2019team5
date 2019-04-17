@@ -18,6 +18,7 @@ public class Class {
         @Override
         public Class parseSnapshot(@NonNull DocumentSnapshot snapshot) {
             return new Class(snapshot.getId(),
+                    snapshot.getString("name"),
                     snapshot.getString("teacherId"),
                     (List<String>) snapshot.get("students"),
                     snapshot.getDate("mostRecent"));
@@ -25,12 +26,14 @@ public class Class {
     };
 
     private String id;
+    private String className;
     private String teacherId;
     private List<String> studentIds;
     private Date mostRecent;
 
-    public Class(String id, String teacherId, List<String> studentIds, Date mostRecent) {
+    public Class(String id, String name,String teacherId, List<String> studentIds, Date mostRecent) {
         this.id = id;
+        this.className = name;
         this.teacherId = teacherId;
         this.studentIds = studentIds;
         this.mostRecent = mostRecent;
@@ -49,6 +52,10 @@ public class Class {
         return this.studentIds.iterator();
     }
 
+    public String getClassName() {
+        return className;
+    }
+
     public Date getMostRecent() {
         return mostRecent;
     }
@@ -57,6 +64,7 @@ public class Class {
     public String toString() {
         return "Class{" +
                 "id='" + id + '\'' +
+                ", className='" + className + '\'' +
                 ", teacherId='" + teacherId + '\'' +
                 ", studentIds=" + studentIds +
                 ", mostRecent=" + mostRecent +
@@ -87,11 +95,12 @@ public class Class {
     public static Class fromSnapshot(DocumentSnapshot snapshot) {
 
         String id = snapshot.getId();
+        String name = snapshot.getString("name");
         String teacherId = snapshot.getString("teacherId");
         List<String> students = (List<String>) snapshot.get("students");
         Date mostRecent = snapshot.getDate("mostRecent");
 
-        return new Class(id, teacherId, students, mostRecent);
+        return new Class(id, name, teacherId, students, mostRecent);
     }
 
 }

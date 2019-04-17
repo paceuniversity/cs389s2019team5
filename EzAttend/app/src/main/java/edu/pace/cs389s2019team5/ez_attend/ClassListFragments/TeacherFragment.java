@@ -103,7 +103,8 @@ public class TeacherFragment extends Fragment {
 
     public void addClass() {
         Controller newClass = new Controller();
-        newClass.createClass(this.user, new OnSuccessListener<String>() {
+        // TODO GET A CLASS NAME FROM THE TEACHER WHEN THEY WANT TO CREATE A CLASS...perhaps make another fragment for this??
+        newClass.createClass(this.user, "NULL",new OnSuccessListener<String>() {
             @Override
             public void onSuccess(String classId) {
                 Toast.makeText(getActivity().getApplicationContext(),

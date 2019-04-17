@@ -83,10 +83,12 @@ public class Controller {
      * @param failureListener the callback when there is an error creating the class
      */
     public void createClass(String teacherId,
+                            String className,
                             final OnSuccessListener<String> successListener,
                             final OnFailureListener failureListener) {
 
         Map<String, Object> classMap = new HashMap<>();
+        classMap.put("name", className);
         classMap.put("teacherId", teacherId);
 
         db.collection("classes")
