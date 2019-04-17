@@ -1,5 +1,7 @@
 package edu.pace.cs389s2019team5.ez_attend.Firebase;
 
+import android.content.Context;
+
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.Date;
@@ -28,6 +30,21 @@ public class Attendee {
 
     public Date getTeacherTimeStamp() {
         return teacherTimeStamp;
+    }
+
+    public String getAttendeeStatus(Context context, Date startTime, long timeToLate) {
+
+        // Check if student is late
+        long startInMillis = startTime.getTime();
+        long studentArrival = this.getStudentTimeStamp().getTime();
+        startInMillis += timeToLate;
+
+        if (startInMillis < studentArrival) {
+            return context.getResources().getString(edu.pace.cs389s2019team5.ez_attend.R.string.attendance_late);
+        } else {
+            return context.getResources().getString(edu.pace.cs389s2019team5.ez_attend.R.string.attendance_present);
+        }
+
     }
 
     public static Attendee fromSnapshot(DocumentSnapshot snapshot) {

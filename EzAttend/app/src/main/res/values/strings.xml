@@ -21,6 +21,13 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
+    <!-- These are used by the student class activity to show the status of a students to each
+     session-->
+    <string name="attendance_present">Present</string>
+    <string name="attendance_late">Late</string>
+    <string name="attendance_absent">Absent</string>
+    <string name="attendance_loading">Loading&#8230;</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="add_student">Add Student</string>

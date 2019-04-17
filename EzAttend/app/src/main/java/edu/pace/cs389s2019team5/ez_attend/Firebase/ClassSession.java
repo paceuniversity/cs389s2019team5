@@ -1,10 +1,21 @@
 package edu.pace.cs389s2019team5.ez_attend.Firebase;
 
+import android.support.annotation.NonNull;
+
+import com.firebase.ui.firestore.SnapshotParser;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.Date;
 
 public class ClassSession {
+
+    public final static SnapshotParser<ClassSession> SNAPSHOTPARSER = new SnapshotParser<ClassSession>() {
+        @NonNull
+        @Override
+        public ClassSession parseSnapshot(@NonNull DocumentSnapshot snapshot) {
+            return new ClassSession(snapshot.getId(), snapshot.getDate("startTime"));
+        }
+    };
 
     private final static String TAG = ClassSession.class.getName();
     public final static String ATTENDEES = "attendees";
@@ -24,6 +35,7 @@ public class ClassSession {
         return id;
     }
 
+    @Deprecated
     /**
      * Given a Firebase firestore snapshot of a session produces a session object that can be
      * manipulated by the rest of the view
