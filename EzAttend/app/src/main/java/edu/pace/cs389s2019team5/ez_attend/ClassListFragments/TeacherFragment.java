@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -60,6 +61,10 @@ public class TeacherFragment extends Fragment {
         this.layoutManager = new LinearLayoutManager(this.getActivity());
         this.rv.setLayoutManager(this.layoutManager);
         this.rv.setAdapter(this.adapter);
+        FragmentManager f = getActivity().getSupportFragmentManager();
+        for(int i = 0; i < f.getBackStackEntryCount(); i++) {
+            f.popBackStack();
+        }
         return v;
     }
 
