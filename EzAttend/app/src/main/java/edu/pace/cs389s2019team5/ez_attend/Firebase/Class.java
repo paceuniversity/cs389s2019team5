@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import com.firebase.ui.firestore.SnapshotParser;
 import com.google.firebase.firestore.DocumentSnapshot;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -16,18 +17,23 @@ public class Class {
         @NonNull
         @Override
         public Class parseSnapshot(@NonNull DocumentSnapshot snapshot) {
-            return new Class(snapshot.getId(), snapshot.getString("teacherId"), (List<String>) snapshot.get("students"));
+            return new Class(snapshot.getId(),
+                    snapshot.getString("teacherId"),
+                    (List<String>) snapshot.get("students"),
+                    snapshot.getDate("mostRecent"));
         }
     };
 
     private String id;
     private String teacherId;
     private List<String> studentIds;
+    private Date mostRecent;
 
-    public Class(String id, String teacherId, List<String> studentIds) {
+    public Class(String id, String teacherId, List<String> studentIds, Date mostRecent) {
         this.id = id;
         this.teacherId = teacherId;
         this.studentIds = studentIds;
+        this.mostRecent = mostRecent;
     }
 
     public String getId() {
@@ -43,12 +49,17 @@ public class Class {
         return this.studentIds.iterator();
     }
 
+    public Date getMostRecent() {
+        return mostRecent;
+    }
+
     @Override
     public String toString() {
         return "Class{" +
                 "id='" + id + '\'' +
                 ", teacherId='" + teacherId + '\'' +
                 ", studentIds=" + studentIds +
+                ", mostRecent=" + mostRecent +
                 '}';
     }
 
@@ -67,8 +78,9 @@ public class Class {
         return id.hashCode();
     }
 
+    @Deprecated
     /**
-     * Generates a class object from a document snapshot
+     * Generates a class object from a document snapshot. @Deprecated Use the SNAPSHOTPARSER instead
      * @param snapshot the document snapshot generally returned by calls to firebase
      * @return the newly created class object
      */
@@ -77,8 +89,9 @@ public class Class {
         String id = snapshot.getId();
         String teacherId = snapshot.getString("teacherId");
         List<String> students = (List<String>) snapshot.get("students");
+        Date mostRecent = snapshot.getDate("mostRecent");
 
-        return new Class(id, teacherId, students);
+        return new Class(id, teacherId, students, mostRecent);
     }
 
 }

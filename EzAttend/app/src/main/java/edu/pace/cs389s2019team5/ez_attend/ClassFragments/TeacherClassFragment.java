@@ -80,8 +80,6 @@ public class TeacherClassFragment extends Fragment {
     public void launchAttendance() {
         Controller session = new Controller();
 
-        this.classID = Controller.DEBUG_CLASS_ID;//DELETE. USE ONLY FOR TESTING!!!!!
-
         session.beginClassSession(this.classID, new OnSuccessListener<String>() {
             @Override
             public void onSuccess(String sessionId) {

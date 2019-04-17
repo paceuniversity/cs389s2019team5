@@ -21,12 +21,12 @@ public class Controller {
     private final static String TAG = Controller.class.getName();
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+    // TODO This should no longer be used after sprint2. Current usage is only in the bluetooth adapter
     public final static String DEBUG_CLASS_ID = "123";
-    public final static String DEBUG_TEACHER_ID = "478";
 
     /**
      * Creates a new class session on firebase so that the class attendance can begin
-     * getting recorded.
+     * getting recorded. It also updates the most recent field of the class
      * @param classId the id of the class that we wish to create a new session for
      * @param successListener what should be done when the creation of the class session was successful.
      *                        A class session will be passed which can be used to get the id and timestamp
@@ -53,6 +53,26 @@ public class Controller {
                     }
                 })
                 .addOnFailureListener(failureListener);
+
+        // This adds the most recent session timestamp to the class itself. With this design,
+        // the time might not match the start time of the session exactly. It may be better to do
+        // this on Firebase instead but this is good enough for the most part.
+        db.collection("classes")
+                .document(classId)
+                .update("mostRecent", FieldValue.serverTimestamp())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "Begin class session: Successfully updated the most recent" +
+                                " session");
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.w(TAG, "Failed to update the most recent class session.", e);
+            }
+
+        });
     }
 
     /**
