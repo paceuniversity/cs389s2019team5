@@ -34,4 +34,5 @@
     <string name="add_class">Create Class</string>
     <string name="join_class">Join Class</string>
     <string name="class_id">Class ID</string>
+    <string name="class_name">Class Name</string>
 </resources>
