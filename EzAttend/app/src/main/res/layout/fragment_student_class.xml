@@ -4,45 +4,49 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ClassListFragments.TeacherFragment">
+    tools:context=".ClassFragments.StudentClassFragment">
 
     <!-- TODO: Update blank fragment layout -->
+
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="20dp">
+        android:layout_height="match_parent">
 
         <Button
-            android:id="@+id/addClassButton"
-            style="@style/FirebaseUI.Button.AccountChooser.GitHubButton"
+            android:id="@+id/checkInButton"
+            style="@style/FirebaseUI.Button.AccountChooser.EmailButton"
             android:layout_width="312dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="50dp"
             android:layout_marginLeft="50dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="50dp"
             android:layout_marginEnd="50dp"
             android:layout_marginRight="50dp"
-            android:drawableLeft="@drawable/ic_note_add"
+            android:drawableLeft="@drawable/ic_check_box"
             android:gravity="center|right"
-            android:text="@string/add_class"
+            android:text="@string/check_in"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rvTeacher"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+        <Button
+            android:id="@+id/studentAttendanceRecordsButton"
+            style="@style/FirebaseUI.Button.AccountChooser.AnonymousButton"
+            android:layout_width="312dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="50dp"
             android:layout_marginLeft="50dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="50dp"
             android:layout_marginEnd="50dp"
             android:layout_marginRight="50dp"
+            android:drawableLeft="@drawable/ic_action_bargraph"
+            android:gravity="center|right"
+            android:text="@string/attendance_records"
+            android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/addClassButton" />
-
+            app:layout_constraintTop_toBottomOf="@+id/checkInButton" />
     </android.support.constraint.ConstraintLayout>
 
 </FrameLayout>

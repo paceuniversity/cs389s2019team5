@@ -1,5 +1,8 @@
 package edu.pace.cs389s2019team5.ez_attend.Firebase;
 
+import android.support.annotation.NonNull;
+
+import com.firebase.ui.firestore.SnapshotParser;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.Iterator;
@@ -9,6 +12,13 @@ public class Class {
 
     private final static String TAG = Class.class.getName();
     public final static String SESSIONS = "sessions";
+    public final static SnapshotParser<Class> SNAPSHOTPARSER = new SnapshotParser<Class>() {
+        @NonNull
+        @Override
+        public Class parseSnapshot(@NonNull DocumentSnapshot snapshot) {
+            return new Class(snapshot.getId(), snapshot.getString("teacherId"), (List<String>) snapshot.get("students"));
+        }
+    };
 
     private String id;
     private String teacherId;
