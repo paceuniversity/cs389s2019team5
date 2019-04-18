@@ -79,26 +79,14 @@ public class SessionsFragment extends Fragment {
                 int day = cal.get(Calendar.DAY_OF_WEEK);
                 if(day==Calendar.MONDAY)
                     color = a;
-                else
-                {
-                    if(day==Calendar.TUESDAY)
-                        color = b;
-                    else
-                    {
-                        if(day==Calendar.WEDNESDAY)
-                            color = c;
-                        else
-                        {
-                            if(day==Calendar.THURSDAY)
-                                color = f;
-                            else
-                            {
-                                if(day==Calendar.FRIDAY)
-                                    color = g;
-                            }
-                        }
-                    }
-                }
+                else if(day==Calendar.TUESDAY)
+                    color = b;
+                else if(day==Calendar.WEDNESDAY)
+                    color = c;
+                else if(day==Calendar.THURSDAY)
+                    color = f;
+                else if(day==Calendar.FRIDAY)
+                    color = g;
 
                 classSelection.setBackground(color);
                 classSelection.setOnClickListener(new View.OnClickListener() {

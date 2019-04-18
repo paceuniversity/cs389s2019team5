@@ -89,24 +89,14 @@ public class StudentFragment extends Fragment {
                 char letter = model.getClassName().charAt(0);
                 if((letter>='A' && letter<='E')||(letter>='a' && letter<='e'))
                     color = a;
-                else
-                {
-                    if((letter>='F' && letter<='J')||(letter>='f' && letter<='j'))
-                        color = b;
-                    else
-                    {
-                        if((letter>='K' && letter<='O')||(letter>='k' && letter<='o'))
-                            color = c;
-                        else
-                        {
-                            if((letter>='P' && letter<='T')||(letter>='p' && letter<='t'))
-                                color = f;
-                            else
-                            if((letter>='U' && letter<='Z')||(letter>='U' && letter<='z'))
-                                color = g;
-                        }
-                    }
-                }
+                else if((letter>='F' && letter<='J')||(letter>='f' && letter<='j'))
+                    color = b;
+                else if((letter>='K' && letter<='O')||(letter>='k' && letter<='o'))
+                    color = c;
+                else if((letter>='P' && letter<='T')||(letter>='p' && letter<='t'))
+                    color = f;
+                else if((letter>='U' && letter<='Z')||(letter>='U' && letter<='z'))
+                    color = g;
 
                 classSelection.setBackground(color);
                 classSelection.setOnClickListener(new View.OnClickListener() {
