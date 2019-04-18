@@ -16,6 +16,7 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import java.util.Calendar;
 import java.util.Random;
 
 import edu.pace.cs389s2019team5.ez_attend.ClassFragments.StudentClassFragment;
@@ -70,11 +71,36 @@ public class SessionsFragment extends Fragment {
                 Drawable c = getResources().getDrawable(R.drawable.fui_idp_button_background_facebook);
                 Drawable f = getResources().getDrawable(R.drawable.fui_idp_button_background_phone);
                 Drawable g = getResources().getDrawable(R.drawable.fui_idp_button_background_twitter);
-                Drawable[] arr = {a,b,c,f,g};//d and e were scrapped
-                Random rand = new Random();
-                int num = rand.nextInt(5);//background could be changed from random to choose depending on class name
+                Drawable h = getResources().getDrawable(R.drawable.fui_idp_button_background_github);
 
-                classSelection.setBackground(arr[num]);
+                Drawable color = h;
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(model.getStartTime());
+                int day = cal.get(Calendar.DAY_OF_WEEK);
+                if(day==Calendar.MONDAY)
+                    color = a;
+                else
+                {
+                    if(day==Calendar.TUESDAY)
+                        color = b;
+                    else
+                    {
+                        if(day==Calendar.WEDNESDAY)
+                            color = c;
+                        else
+                        {
+                            if(day==Calendar.THURSDAY)
+                                color = f;
+                            else
+                            {
+                                if(day==Calendar.FRIDAY)
+                                    color = g;
+                            }
+                        }
+                    }
+                }
+
+                classSelection.setBackground(color);
                 classSelection.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         openSession(model);

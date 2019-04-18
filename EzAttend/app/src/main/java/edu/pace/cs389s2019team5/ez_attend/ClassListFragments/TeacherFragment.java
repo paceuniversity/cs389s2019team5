@@ -83,11 +83,32 @@ public class TeacherFragment extends Fragment {
                 Drawable c = getResources().getDrawable(R.drawable.fui_idp_button_background_facebook);
                 Drawable f = getResources().getDrawable(R.drawable.fui_idp_button_background_phone);
                 Drawable g = getResources().getDrawable(R.drawable.fui_idp_button_background_twitter);
-                Drawable[] arr = {a,b,c,f,g};//d and e were scrapped
-                Random rand = new Random();
-                int num = rand.nextInt(5);//background could be changed from random to choose depending on class name
+                Drawable h = getResources().getDrawable(R.drawable.fui_idp_button_background_google);
 
-                classSelection.setBackground(arr[num]);
+                Drawable color = h;
+                char letter = model.getClassName().charAt(0);
+                if((letter>='A' && letter<='E')||(letter>='a' && letter<='e'))
+                    color = a;
+                else
+                {
+                    if((letter>='F' && letter<='J')||(letter>='f' && letter<='j'))
+                        color = b;
+                    else
+                    {
+                        if((letter>='K' && letter<='O')||(letter>='k' && letter<='o'))
+                            color = c;
+                        else
+                        {
+                            if((letter>='P' && letter<='T')||(letter>='p' && letter<='t'))
+                                color = f;
+                            else
+                            if((letter>='U' && letter<='Z')||(letter>='U' && letter<='z'))
+                                color = g;
+                        }
+                    }
+                }
+
+                classSelection.setBackground(color);
                 classSelection.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         openClass(model.getId());
