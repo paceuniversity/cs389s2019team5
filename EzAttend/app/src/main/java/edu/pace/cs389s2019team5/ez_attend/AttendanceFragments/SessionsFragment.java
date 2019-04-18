@@ -77,7 +77,7 @@ public class SessionsFragment extends Fragment {
                 classSelection.setBackground(arr[num]);
                 classSelection.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
-                        openSession();
+                        openSession(model);
                     }
                 });
             }
@@ -90,10 +90,11 @@ public class SessionsFragment extends Fragment {
         };
     }
 
-    private void openSession()
+    private void openSession(ClassSession session)
     {
         SessionAttendanceFragment fragment = new SessionAttendanceFragment();
-        //fragment.setClassId(this.classId);
+        fragment.setClassId(this.classId);
+        fragment.setSession(session);
         getFragmentManager().beginTransaction().replace(R.id.fragment_content, fragment).addToBackStack(TAG).commit();
     }
 
