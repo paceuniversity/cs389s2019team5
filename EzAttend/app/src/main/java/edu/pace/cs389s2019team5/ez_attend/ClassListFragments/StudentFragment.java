@@ -95,7 +95,7 @@ public class StudentFragment extends Fragment {
                     color = c;
                 else if((letter>='P' && letter<='T')||(letter>='p' && letter<='t'))
                     color = f;
-                else if((letter>='U' && letter<='Z')||(letter>='U' && letter<='z'))
+                else if((letter>='U' && letter<='Z')||(letter>='u' && letter<='z'))
                     color = g;
 
                 classSelection.setBackground(color);
