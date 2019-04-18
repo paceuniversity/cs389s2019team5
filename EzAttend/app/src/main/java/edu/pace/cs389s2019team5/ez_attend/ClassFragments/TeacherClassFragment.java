@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 
+import edu.pace.cs389s2019team5.ez_attend.AttendanceFragments.SessionsFragment;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Attendee;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.ClassSession;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
@@ -60,12 +61,12 @@ public class TeacherClassFragment extends Fragment {
             }
         });
 
-//        Button showAttendance = v.findViewById(R.id.attendanceRecordsButton);
-//        showAttendance.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View v) {
-//                showAttendance();
-//            }
-//        });
+        Button showAttendance = v.findViewById(R.id.attendanceRecordsButton);
+        showAttendance.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                showAttendance();
+            }
+        });
 
 //        Button addStudent = v.findViewById(R.id.addStudentButton);
 //        addStudent.setOnClickListener(new View.OnClickListener() {
@@ -76,7 +77,12 @@ public class TeacherClassFragment extends Fragment {
 
         return v;
     }
-
+    public void showAttendance()
+    {
+        SessionsFragment fragment = new SessionsFragment();
+        fragment.setClassId(classID);
+        getFragmentManager().beginTransaction().replace(R.id.fragment_content, fragment).addToBackStack(TAG).commit();
+    }
     public void launchAttendance() {
         Controller session = new Controller();
 
@@ -107,7 +113,7 @@ public class TeacherClassFragment extends Fragment {
 
     public void exportAttendance() {
 
-        this.classID = Controller.DEBUG_CLASS_ID;//DELETE. USE ONLY FOR TESTING!!!!!
+        //this.classID = Controller.DEBUG_CLASS_ID;//DELETE. USE ONLY FOR TESTING!!!!!
 
         final edu.pace.cs389s2019team5.ez_attend.Firebase.View v = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
         sessionsOld = new ArrayList<>();

@@ -1,7 +1,9 @@
 package edu.pace.cs389s2019team5.ez_attend.Firebase;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
+import com.firebase.ui.firestore.SnapshotParser;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.Date;
@@ -9,6 +11,16 @@ import java.util.Date;
 public class Attendee {
 
     private final static String TAG = Attendee.class.getName();
+
+    public final static SnapshotParser<Attendee> SNAPSHOTPARSER = new SnapshotParser<Attendee>() {
+        @NonNull
+        @Override
+        public Attendee parseSnapshot(@NonNull DocumentSnapshot snapshot) {
+            Date studentTimeStamp = snapshot.getDate("timeStamp");
+            Date teacherTimeStamp = snapshot.getDate("teacherTimestamp");
+            return new Attendee(snapshot.getId(), studentTimeStamp, teacherTimeStamp);
+        }
+    };
 
     private String id;
     private Date studentTimeStamp;
@@ -47,6 +59,7 @@ public class Attendee {
 
     }
 
+    @Deprecated
     public static Attendee fromSnapshot(DocumentSnapshot snapshot) {
 
         if (snapshot == null) {
