@@ -52,7 +52,14 @@ public class TeacherFragment extends Fragment {
             public void onClick(View view) {
                 EditText tempClassText = v.findViewById(R.id.classNameInput);
                 String className = tempClassText.getText().toString().trim();
-                addClass(className);
+                if (className.equals("")) {
+                    Toast.makeText(getActivity().getApplicationContext(),
+                            "Please enter a name for the class",
+                            Toast.LENGTH_SHORT).show();
+                    Log.i(TAG, "failed to create class");
+                }else {
+                    addClass(className);
+                }
                 tempClassText.setText("");
             }
         });
