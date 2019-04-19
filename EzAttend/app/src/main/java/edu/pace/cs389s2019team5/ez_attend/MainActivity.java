@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
             }, new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    Log.i(TAG, "Couldn't check if student exists");
+                    Log.e(TAG, "Couldn't check if student exists", e);
                     // todo tell them we couldn't sign them in and try again later?
                 }
             });
