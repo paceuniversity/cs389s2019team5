@@ -1,8 +1,12 @@
 package edu.pace.cs389s2019team5.ez_attend.ClassFragments;
 
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +23,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Hashtable;
 
@@ -161,11 +166,19 @@ public class TeacherClassFragment extends Fragment {
     }
     private void export() {
         try {
-            String directory = getContext().getFilesDir().getAbsolutePath()+"/records.csv";
-            File file = new File(directory);
+            String[] PermissionToWrite = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            int permission = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            while (permission!= PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                        getActivity(), PermissionToWrite, 1
+                );
+            }
+            String name = "EzAttendanceRecord" + Calendar.getInstance().getTime();
+            File file = new File(Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DOWNLOADS),name);
             CSVWriter writer = new CSVWriter(new FileWriter(file));
 
-            Log.i(TAG, "Log:"+ directory);
+            Log.i(TAG, "Log:"+ name);
 
             String[] record = {"Class Session ID", "Class Session Date", "Class Session Attendees"};
             writer.writeNext(record);
