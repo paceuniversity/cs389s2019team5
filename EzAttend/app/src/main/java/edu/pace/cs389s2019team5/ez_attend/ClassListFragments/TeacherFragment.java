@@ -52,7 +52,7 @@ public class TeacherFragment extends Fragment {
             public void onClick(View view) {
                 EditText tempClassText = v.findViewById(R.id.classNameInput);
                 String className = tempClassText.getText().toString().trim();
-                if (className.equals("")) {
+                if (className.trim().equals("")) {
                     Toast.makeText(getActivity().getApplicationContext(),
                             "Please enter a name for the class",
                             Toast.LENGTH_SHORT).show();
