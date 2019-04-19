@@ -1,8 +1,12 @@
 package edu.pace.cs389s2019team5.ez_attend.ClassFragments;
 
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +23,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Hashtable;
 
@@ -161,35 +166,50 @@ public class TeacherClassFragment extends Fragment {
     }
     private void export() {
         try {
-            String directory = getContext().getFilesDir().getAbsolutePath()+"/records.csv";
-            File file = new File(directory);
-            CSVWriter writer = new CSVWriter(new FileWriter(file));
+            String[] PermissionToWrite = { Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            int permission = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            if (permission!= PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                        getActivity(), PermissionToWrite, 1
+                );
 
-            Log.i(TAG, "Log:"+ directory);
+            } else if (isExternalStorageWritable()) {
+                String name = "EzAttendanceRecord" + Calendar.getInstance().getTime();
+                File file = new File(Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_DOWNLOADS), name);
+                CSVWriter writer = new CSVWriter(new FileWriter(file));
 
-            String[] record = {"Class Session ID", "Class Session Date", "Class Session Attendees"};
-            writer.writeNext(record);
+                Log.i(TAG, "Log:" + name);
+
+                String[] record = {"Class Session ID", "Class Session Date", "Class Session Attendees"};
+                writer.writeNext(record);
 
 
-            for(ClassSession i:sessionsNew.keySet())
-            {
-                String id = i.getId();
-                Date date = i.getStartTime();
-                String students = "";
-                ArrayList<Attendee> sessionAttendees = sessionsNew.get(i);
-                for (Attendee attendee : sessionAttendees)
-                {
-                    students+=attendee.getId();
-                    students+="&";
+                for (ClassSession i : sessionsNew.keySet()) {
+                    String id = i.getId();
+                    Date date = i.getStartTime();
+                    String students = "";
+                    ArrayList<Attendee> sessionAttendees = sessionsNew.get(i);
+                    for (Attendee attendee : sessionAttendees) {
+                        students += attendee.getId();
+                        students += "&";
+                    }
+                    if (students.length() != 0)
+                        students = students.substring(0, students.length() - 1);
+                    String[] entry = {id, date.toString(), students};
+                    writer.writeNext(entry);
                 }
-                if(students.length()!=0)
-                    students = students.substring(0, students.length() - 1);
-                String[] entry = {id, date.toString(), students};
-                writer.writeNext(entry);
+                writer.close();
             }
-            writer.close();
         } catch (IOException e) {
             Log.e(TAG, "Error when attempting to export attendance", e);
         }
+    }
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
     }
 }
