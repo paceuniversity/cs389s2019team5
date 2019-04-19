@@ -8,56 +8,38 @@
     android:background="@color/mainBackground"
     tools:context=".MainActivity">
 
-    <!-- TODO MAKE THIS A MORE APPROPRIATE LAUNCHER PAGE -->
-
     <TextView
-        android:id="@+id/menuBarMain"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:background="@color/menuBarBackground"
-        android:gravity="center|top"
-        android:paddingTop="20dp"
-        android:text="@string/main_menu"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display2"
-        android:textColor="@color/menuBarText"
+        android:id="@+id/InProgressTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="82dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="Loading, Please Wait"
+        android:textColor="@color/colorPrimary"
+        android:textSize="36sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/teacherActivityButton"
-        android:layout_width="0dp"
-        android:layout_height="75dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginRight="10dp"
-        android:background="@drawable/appleborder"
-        android:gravity="center_vertical"
-        android:paddingLeft="10dp"
-        android:text="@string/teacher"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display2"
-        android:textColor="@android:color/black"
-        android:typeface="normal"
+    <ProgressBar
+        android:id="@+id/RunningProgressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="227dp"
+        android:layout_height="188dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="23dp"
+        android:indeterminateDrawable="@drawable/progress"
+        app:layout_constraintBottom_toTopOf="@+id/InProgressTextView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/menuBarMain" />
-
-    <Button
-        android:id="@+id/studentActivityButton"
-        android:layout_width="0dp"
-        android:layout_height="75dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginRight="10dp"
-        android:background="@drawable/capborder"
-        android:gravity="center_vertical"
-        android:paddingLeft="10dp"
-        android:text="@string/student"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display2"
-        android:textColor="@android:color/black"
-        android:typeface="normal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/teacherActivityButton" />
+        app:layout_constraintHorizontal_bias="0.465"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </android.support.constraint.ConstraintLayout>
