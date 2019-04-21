@@ -31,6 +31,7 @@ import edu.pace.cs389s2019team5.ez_attend.AttendanceFragments.SessionsFragment;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Attendee;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.ClassSession;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Student;
 import edu.pace.cs389s2019team5.ez_attend.R;
 
 /**
@@ -174,7 +175,7 @@ public class TeacherClassFragment extends Fragment {
                 );
 
             } else if (isExternalStorageWritable()) {
-                String name = "EzAttendanceRecord" + Calendar.getInstance().getTime();
+                String name = "EzAttendanceRecord" + Calendar.getInstance().getTime() + ".csv";
                 File file = new File(Environment.getExternalStoragePublicDirectory(
                         Environment.DIRECTORY_DOWNLOADS), name);
                 CSVWriter writer = new CSVWriter(new FileWriter(file));
@@ -183,23 +184,38 @@ public class TeacherClassFragment extends Fragment {
 
                 String[] record = {"Class Session ID", "Class Session Date", "Class Session Attendees"};
                 writer.writeNext(record);
+                final edu.pace.cs389s2019team5.ez_attend.Firebase.View v = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
 
 
                 for (ClassSession i : sessionsNew.keySet()) {
                     String id = i.getId();
                     Date date = i.getStartTime();
-                    String students = "";
+                    final StringBuffer students= new StringBuffer();
                     ArrayList<Attendee> sessionAttendees = sessionsNew.get(i);
                     for (Attendee attendee : sessionAttendees) {
-                        students += attendee.getId();
-                        students += "&";
+                        v.getStudent(attendee.getId(), new OnSuccessListener<Student>() {
+                            @Override
+                            public void onSuccess(Student student) {
+                                String individual = student.getFirstName() + " " + student.getLastName();
+                                students.append(individual);
+                                students.append("&");
+                            }
+                        }, new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.i(TAG, "Did not find student");
+                            }
+                        });
                     }
                     if (students.length() != 0)
-                        students = students.substring(0, students.length() - 1);
-                    String[] entry = {id, date.toString(), students};
+                        students.deleteCharAt(students.length()-1);
+                    String[] entry = {id, date.toString(), students.toString()};
                     writer.writeNext(entry);
                 }
                 writer.close();
+                Toast.makeText(getActivity().getApplicationContext(),
+                        "Data exported successfully",
+                        Toast.LENGTH_SHORT).show();
             }
         } catch (IOException e) {
             Log.e(TAG, "Error when attempting to export attendance", e);
