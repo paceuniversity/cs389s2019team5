@@ -174,6 +174,7 @@ public class TeacherClassFragment extends Fragment {
                 );
 
             } else if (isExternalStorageWritable()) {
+
                 String name = "EzAttendanceRecord " + Calendar.getInstance().getTime()+".csv";
                 name = name.replaceAll(":","-");
                 File file = new File(Environment.getExternalStoragePublicDirectory(
