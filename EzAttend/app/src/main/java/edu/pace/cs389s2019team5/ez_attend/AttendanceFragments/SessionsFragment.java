@@ -17,9 +17,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import java.util.Calendar;
-import java.util.Random;
 
-import edu.pace.cs389s2019team5.ez_attend.ClassFragments.StudentClassFragment;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.ClassSession;
 import edu.pace.cs389s2019team5.ez_attend.R;
 

@@ -60,7 +60,7 @@
             android:layout_marginRight="50dp"
             android:drawableLeft="@drawable/ic_action_download"
             android:gravity="center|right"
-            android:text="@string/attendance_records"
+            android:text="@string/export_attendance"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
