@@ -4,7 +4,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -22,8 +21,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-
-import java.util.Random;
 
 import edu.pace.cs389s2019team5.ez_attend.ClassFragments.StudentClassFragment;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
@@ -61,10 +58,6 @@ public class StudentFragment extends Fragment {
         this.layoutManager = new LinearLayoutManager(this.getActivity());
         this.rv.setLayoutManager(this.layoutManager);
         this.rv.setAdapter(this.adapter);
-        FragmentManager f = getActivity().getSupportFragmentManager();
-        for(int i = 0; i < f.getBackStackEntryCount(); i++) {
-            f.popBackStack();
-        }
         return v;
     }
 
