@@ -14,8 +14,6 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 
 public class View {
 
@@ -25,32 +23,27 @@ public class View {
     public View() { }
 
     /**
-     * Loads the students in the class.
+     * Gets a class from the database. This typically means that we will have the teacher id,
+     * and all the students in the class.
+     * @param classId the class id of the class we wish to receive.
      * @param onSuccessListener what to do with the students info
      * @param onFailureListener if it fails, what should happen
      */
-    public void getStudents(final OnSuccessListener<ArrayList<Student>> onSuccessListener,
-                            OnFailureListener onFailureListener) {
+    public void getClass(final String classId,
+                            final OnSuccessListener<Class> onSuccessListener,
+                            final OnFailureListener onFailureListener) {
 
-        CollectionReference studentsRef = db.collection("students");
+        db.collection("classes")
+                .document(classId).get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
 
-        studentsRef
-            .get()
-            .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                @Override
-                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                    ArrayList<Student> students = new ArrayList<>();
-                    for (QueryDocumentSnapshot docSnapshot : queryDocumentSnapshots) {
-                        try {
-                            Student student = getStudentFromDocSnap(docSnapshot);
-                            students.add(student);
-                        } catch (NullPointerException exc) {
-                            Log.e(TAG, "Error parsing student", exc);
-                        }
+                        Class m_class = Class.fromSnapshot(documentSnapshot);
+                        onSuccessListener.onSuccess(m_class);
                     }
-                    onSuccessListener.onSuccess(students);
-                }
-            }).addOnFailureListener(onFailureListener);
+                })
+                .addOnFailureListener(onFailureListener);
     }
 
     /**
@@ -71,7 +64,7 @@ public class View {
                 if (snapshot.exists()) {
                     Student student;
                     try {
-                        student = getStudentFromDocSnap(snapshot);
+                        student = Student.fromSnapshot(snapshot);
                     } catch (NullPointerException exc) {
                         student = null;
                         Log.w(TAG, "Student with id " + id + " was corrupt ", exc);
@@ -88,15 +81,17 @@ public class View {
 
     /**
      * Loads the id's of all the sessions that have taken place in chronological order by start time
+     * @param classId the class id of the class that we wish to get the sessions for
      * @param onSuccessListener the callback for when we get this info
      * @param onFailureListener the callback for failing to get the info
      */
-    public void getSessions(final OnSuccessListener<ArrayList<ClassSession>> onSuccessListener,
+    public void getSessions(final String classId,
+                            final OnSuccessListener<ArrayList<ClassSession>> onSuccessListener,
                             OnFailureListener onFailureListener) {
 
-        CollectionReference sessionsRef = db.collection("sessions");
-
-        sessionsRef
+        db.collection("classes")
+                .document(classId)
+                .collection("sessions")
                 .orderBy("startTime")
                 .get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -105,7 +100,7 @@ public class View {
                         ArrayList<ClassSession> sessions = new ArrayList<>();
                         for (QueryDocumentSnapshot docSnapshot : queryDocumentSnapshots) {
                             try {
-                                ClassSession session = getSessionFromDocSnap(docSnapshot);
+                                ClassSession session = ClassSession.fromSnapshot(docSnapshot);
                                 sessions.add(session);
                             } catch (NullPointerException exc) {
                                 Log.e(TAG, "Error parsing session", exc);
@@ -119,80 +114,99 @@ public class View {
     /**
      * Loads the session info for a provided session. The id for the session must be provided.
      * Using this info it pulls the attendance for that specific session
+     * @param classId the class id of the class that we wish to get the session attendance for
      * @param session the session that we are interested in getting the attendance for
      * @param onSuccessListener the callback for getting this information
      * @param onFailureListener the failure callback for this info
      */
-    public void getSessionAttendance(final ClassSession session,
-                                     final OnSuccessListener<ClassSession> onSuccessListener,
+    public void getSessionAttendance(final String classId,
+                                     final ClassSession session,
+                                     final OnSuccessListener<ArrayList<Attendee>> onSuccessListener,
                                      OnFailureListener onFailureListener) {
 
-        CollectionReference attendeesCollection = db.collection("sessions")
+        CollectionReference attendeesCollection = db.collection("classes")
+                .document(classId)
+                .collection("sessions")
                 .document(session.getId())
-                .collection("attendees");
+                .collection(ClassSession.ATTENDEES);
 
         attendeesCollection.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot snapshot) {
-                HashMap<Student, Date> mMap = new HashMap<>();
+                ArrayList<Attendee> attendees = new ArrayList<>();
                 for (QueryDocumentSnapshot snap : snapshot) {
-                    mMap.put(new Student(snap.getId()), snap.getDate("timeStamp"));
+                    Log.d(TAG, "Got attendee with id: " + snap.getId());
+                    attendees.add(Attendee.fromSnapshot(snap));
                 }
 
-                session.setAttendees(mMap);
-                onSuccessListener.onSuccess(session);
+                onSuccessListener.onSuccess(attendees);
             }
         }).addOnFailureListener(onFailureListener);
 
     }
 
-    public ListenerRegistration listenForMarking(String courseId,
+    /**
+     * Gets the attendee information for a student in a given class and for a given session. This
+     * is useful for understanding if the student attended the given session and if so, their
+     * time of arrival.
+     * @param classId the id for the class that we are interested in testing for
+     * @param sessionId the id for the session of interest. The session id should be part of the
+     *                  class with the given class id
+     * @param attendeeId the attendee id. It is assumed that this student id is in fact a student
+     *                   of the given class
+     * @param onSuccessListener the callback if successful. This returns the attendee object if the
+     *                          student did in fact attend this session or null if they were absent
+     * @param onFailureListener the callback if there is any issue getting the student information.
+     *                          This could be because we are not connected to the network
+     */
+    public void getAttendee(final String classId,
+                            final String sessionId,
+                            final String attendeeId,
+                            final OnSuccessListener<Attendee> onSuccessListener,
+                            final OnFailureListener onFailureListener) {
+
+        Log.i(TAG, "Getting stuff for " + attendeeId);
+        db.collection("classes")
+                .document(classId)
+                .collection(Class.SESSIONS)
+                .document(sessionId)
+                .collection(ClassSession.ATTENDEES)
+                .document(attendeeId)
+                .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot snapshot) {
+                // Convert the given snapshot to an attendee object
+                if (snapshot.exists()) {
+                    Attendee attendee = Attendee.fromSnapshot(snapshot);
+                    onSuccessListener.onSuccess(attendee);
+                } else {
+                    onSuccessListener.onSuccess(null);
+                }
+            }
+        }).addOnFailureListener(onFailureListener);
+
+    }
+
+    /**
+     * Used by students to wait until they are marked present by their teacher.
+     * @param classId the class id of the class that we want to listen on
+     * @param courseId the id of the session that we wish to listen on
+     * @param studentId the id of the student that we are interested in
+     * @param eventListener the callback for what should happen when we receive an update on this
+     *                      student
+     * @return the listener registration so that the caller can cancel the listener
+     */
+    public ListenerRegistration listenForMarking(String classId,
+                                                 String courseId,
                                                  String studentId,
                                                  EventListener<DocumentSnapshot> eventListener) {
 
-        final DocumentReference docRef = db.collection("sessions/ " + courseId + "/attendees").document(studentId);
+        final DocumentReference docRef = db.collection("classes")
+                .document(classId)
+                .collection("sessions/ " + courseId + "/attendees")
+                .document(studentId);
+
         return docRef.addSnapshotListener(eventListener);
-
-    }
-
-    /**
-     * Given a Firebase firestore snapshot of a student produces a student object that can be
-     * manipulated by the rest of the view
-     * @param snapshot the firebase snapshot of a student
-     * @return the student object based off of the student snapshot that was provided
-     * @throws NullPointerException if the snapshot provided was null or the student data was null
-     */
-    private Student getStudentFromDocSnap(DocumentSnapshot snapshot) {
-
-        if (snapshot == null) {
-            throw new NullPointerException("Snapshot cannot be null");
-        }
-
-        Student student = new Student(snapshot.getId());
-
-        student.setFirstName(snapshot.getString("firstName"));
-        student.setLastName(snapshot.getString("lastName"));
-        student.setMacAddress(snapshot.getString("macAddress"));
-
-        return student;
-
-    }
-
-    /**
-     * Given a Firebase firestore snapshot of a session produces a session object that can be
-     * manipulated by the rest of the view
-     * @param snapshot the firebase snapshot of a session
-     * @return the session object based off of the session snapshot that was provided
-     * @throws NullPointerException if the snapshot provided was null or the session data was null
-     */
-    private ClassSession getSessionFromDocSnap(DocumentSnapshot snapshot) {
-
-        if (snapshot == null) {
-            throw new NullPointerException("Snapshot cannot be null");
-        }
-        ClassSession session = new ClassSession(snapshot.getId());
-        session.setStartTime(snapshot.getDate("startTime"));
-        return session;
 
     }
 

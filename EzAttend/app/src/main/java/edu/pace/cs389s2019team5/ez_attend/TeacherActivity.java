@@ -15,13 +15,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.Hashtable;
 
 import com.opencsv.CSVWriter;
 
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Attendee;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.ClassSession;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
-import edu.pace.cs389s2019team5.ez_attend.Firebase.Student;
 
 public class TeacherActivity extends AppCompatActivity {
 
@@ -35,11 +35,11 @@ public class TeacherActivity extends AppCompatActivity {
 
     public void launchAttendance (View view) {
         Controller session = new Controller();
-        session.beginClassSession(new OnSuccessListener<ClassSession>() {
+        session.beginClassSession(Controller.DEBUG_CLASS_ID, new OnSuccessListener<String>() {
             @Override
-            public void onSuccess(ClassSession classSession) {
+            public void onSuccess(String sessionId) {
                 Toast.makeText(TeacherActivity.this,
-                        "New class created with Id: " + classSession.getId(),
+                        "New class created with Id: " + sessionId,
                         Toast.LENGTH_SHORT).show();
                 Log.i(TAG, "Successfully taking attendance");
             }
@@ -55,18 +55,20 @@ public class TeacherActivity extends AppCompatActivity {
     }
 
     private ArrayList<ClassSession> sessionsOld;
-    private ArrayList<ClassSession> sessionsNew;
-    private ClassSession[] sessionTemp = new ClassSession[1];
+    private Hashtable<ClassSession, ArrayList<Attendee>> sessionsNew;
+
     public void exportAttendance (View view) {
         final edu.pace.cs389s2019team5.ez_attend.Firebase.View v = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
         sessionsOld = new ArrayList<>();
 
-        sessionsNew = new ArrayList<>();
-        v.getSessions(new OnSuccessListener<ArrayList<ClassSession>>() {
+        sessionsNew = new Hashtable<>();
+        v.getSessions(Controller.DEBUG_CLASS_ID, new OnSuccessListener<ArrayList<ClassSession>>() {
             @Override
             public void onSuccess(ArrayList<ClassSession> classSessions) {
                 sessionsOld = classSessions;
-                addAttendees();
+                for (ClassSession session : classSessions) {
+                    addAttendees(session);
+                }
                 Log.i(TAG, "Successful");
             }
         }, new OnFailureListener() {
@@ -79,31 +81,27 @@ public class TeacherActivity extends AppCompatActivity {
             }
         });
     }
-    private void addAttendees() {
+    private void addAttendees(final ClassSession session) {
         final edu.pace.cs389s2019team5.ez_attend.Firebase.View v = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
-        for(ClassSession i:sessionsOld)
-        {
-            v.getSessionAttendance(i,new OnSuccessListener<ClassSession>() {
+            v.getSessionAttendance(Controller.DEBUG_CLASS_ID, session,new OnSuccessListener<ArrayList<Attendee>>() {
                 @Override
-                public void onSuccess(ClassSession classSession) {
-                    sessionTemp[0]=classSession;
-                    sessionsNew.add(sessionTemp[0]);
-                    if(sessionsNew.size() == sessionsOld.size())
+                public void onSuccess(ArrayList<Attendee> attendees) {
+                    sessionsNew.put(session, attendees);
+                    if(sessionsNew.size() == sessionsOld.size()) {
+                        Log.d(TAG, sessionsNew.size() + ", " + sessionsOld.size());
                         export();
+                    }
                     Log.i(TAG, "Successful");
                 }
             }, new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    sessionTemp[0]=null;
                     Toast.makeText(TeacherActivity.this,
                             "Failed to export attendance",
                             Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "Error when attempting to export attendance", e);
                 }
             });
-        }
-
     }
     private void export() {
         try {
@@ -117,15 +115,15 @@ public class TeacherActivity extends AppCompatActivity {
             writer.writeNext(record);
 
 
-            for(ClassSession i:sessionsNew)
+            for(ClassSession i:sessionsNew.keySet())
             {
                 String id = i.getId();
                 Date date = i.getStartTime();
                 String students = "";
-                Iterator<Student> s= i.getAttendeeIterator();
-                while(s.hasNext())
+                ArrayList<Attendee> sessionAttendees = sessionsNew.get(i);
+                for (Attendee attendee : sessionAttendees)
                 {
-                    students+=s.next().getId();
+                    students+=attendee.getId();
                     students+="&";
                 }
                 if(students.length()!=0)

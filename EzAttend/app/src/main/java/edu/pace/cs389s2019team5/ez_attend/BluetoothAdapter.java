@@ -51,7 +51,7 @@ public class BluetoothAdapter {
                     if (BluetoothAdapter.this.studentHashMap.containsKey(deviceMacAddress)) {
                         // Mark the student present
                         final Student student = BluetoothAdapter.this.studentHashMap.get(deviceMacAddress);
-                        BluetoothAdapter.this.controller.teacherMarkPresent(
+                        BluetoothAdapter.this.controller.teacherMarkPresent(Controller.DEBUG_CLASS_ID,
                                 student.getId(), new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
@@ -206,7 +206,7 @@ public class BluetoothAdapter {
         }
 
         // Begin listening to see if I am enabled
-        listener = view.listenForMarking(sessionId, studentId, new EventListener<DocumentSnapshot>() {
+        listener = view.listenForMarking(Controller.DEBUG_CLASS_ID, sessionId, studentId, new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
                 if (e != null) {
