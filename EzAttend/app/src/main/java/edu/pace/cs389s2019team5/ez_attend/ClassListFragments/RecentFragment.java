@@ -55,7 +55,7 @@ public class RecentFragment extends Fragment {
         return v;
     }
 
-    public void openClass(String classID, boolean teacher) {Log.i(TAG, "Recent"+ teacher);
+    public void openClass(String classID, boolean teacher) {
         if(teacher)
         {
             TeacherClassFragment fragment = new TeacherClassFragment();
