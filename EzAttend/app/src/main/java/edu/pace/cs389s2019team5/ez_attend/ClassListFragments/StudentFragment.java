@@ -25,6 +25,7 @@ import com.google.firebase.firestore.Query;
 import edu.pace.cs389s2019team5.ez_attend.ClassFragments.StudentClassFragment;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Model;
 import edu.pace.cs389s2019team5.ez_attend.R;
 
 
@@ -62,7 +63,7 @@ public class StudentFragment extends Fragment {
     }
 
     private void createAdapter() {
-        Query query = FirebaseFirestore.getInstance().collection("classes").whereArrayContains("students",this.user);
+        Query query = FirebaseFirestore.getInstance().collection(Model.CLASSES).whereArrayContains("students",this.user);
         FirestoreRecyclerOptions<Class> options = new FirestoreRecyclerOptions.Builder<Class>().setQuery(query, Class.SNAPSHOTPARSER).build();
 
         this.adapter = new FirestoreRecyclerAdapter<Class, StudentFragment.ClassHolder>(options) {
