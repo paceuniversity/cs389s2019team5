@@ -92,6 +92,7 @@ public class StudentActivity extends AppCompatActivity {
         Intent intent = new Intent(this, ClassListActivity.class);
         intent.putExtra(ClassListActivity.CURRENT_USER_TAG, student);
         startActivity(intent);
+        finish();
     }
 
 }
