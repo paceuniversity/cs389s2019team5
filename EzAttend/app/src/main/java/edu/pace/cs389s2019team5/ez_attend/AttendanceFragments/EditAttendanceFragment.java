@@ -83,7 +83,7 @@ public class EditAttendanceFragment extends Fragment {
 
     private void mark(final Enum mark) {
         Controller c = new Controller();
-        c.markManual(mark, this.classId, this.sessionId, this.studentId, new OnSuccessListener<Void>() {
+        c.markManual(this.classId, this.sessionId, this.studentId, mark, new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Toast.makeText(getActivity().getApplicationContext(),
