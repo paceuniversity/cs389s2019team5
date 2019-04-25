@@ -14,12 +14,15 @@ import android.widget.TextView;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Attendee;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.ClassSession;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Student;
 import edu.pace.cs389s2019team5.ez_attend.R;
 
 /**
@@ -47,15 +50,32 @@ public class SessionAttendanceFragment extends Fragment {
                                         @NonNull final Attendee model) {
 
             Log.d(TAG, "Binding view holder");
-            holder.m_attendeeId.setText(model.getId());
+            edu.pace.cs389s2019team5.ez_attend.Firebase.View v = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
+            v.getStudent(model.getId(), new OnSuccessListener<Student>() {
+                @Override
+                public void onSuccess(Student s) {
 
-            // This caches the result in attendees so it doesn't reload every time the user
-            // scrolls through the attendance records
+                    // This caches the result in attendees so it doesn't reload every time the user
+                    // scrolls through the attendance records
 
-            holder.m_attendeeStatus.setText(
-                    model.getAttendeeStatus(SessionAttendanceFragment.this.getContext(),
-                            m_session.getStartTime(),
-                            600000));
+                    holder.m_attendeeId.setText(s.getFirstName()+" "+ s.getLastName());
+                    holder.m_attendeeStatus.setText(
+                            model.getAttendeeStatus(SessionAttendanceFragment.this.getContext(),
+                                    m_session.getStartTime(),
+                                    600000));
+
+                }
+            }, new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+
+                    Log.e(TAG, "Error when attempting to display attendee", e);
+                }
+            });
+
+
+
+
 
         }
 
