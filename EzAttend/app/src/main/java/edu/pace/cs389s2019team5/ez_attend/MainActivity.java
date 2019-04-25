@@ -43,8 +43,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        Log.v(TAG, "Request Code: " + requestCode);
+        Log.v(TAG, "Result Code: " + resultCode);
+
         // RC_SIGN_IN is the request code you passed into startActivityForResult(...) when starting the sign in flow.
         if (requestCode == RC_SIGN_IN) {
             IdpResponse response = IdpResponse.fromResultIntent(data);
@@ -83,10 +88,12 @@ public class MainActivity extends AppCompatActivity {
                         Log.d(TAG, "First time student signs in to this app");
                         Intent intent = new Intent(MainActivity.this, StudentActivity.class);
                         startActivity(intent);
+                        finish();
                     } else {
                         Intent intent = new Intent(MainActivity.this, ClassListActivity.class);
                         intent.putExtra(ClassListActivity.CURRENT_USER_TAG, student);
                         startActivity(intent);
+                        finish();
                     }
                 }
             }, new OnFailureListener() {

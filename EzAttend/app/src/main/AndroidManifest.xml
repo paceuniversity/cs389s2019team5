@@ -33,7 +33,6 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
-            android:noHistory="true"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
