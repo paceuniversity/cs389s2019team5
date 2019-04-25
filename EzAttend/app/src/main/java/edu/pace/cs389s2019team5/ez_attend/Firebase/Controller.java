@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
@@ -347,3 +348,36 @@ public class Controller {
 
     }
 }
+
+    /**
+     * Creates a new user in firestore based on the provided user information.
+     * @param userId the user id of the signed in user. this is unique for this user
+     * @param firstName the first name of the user
+     * @param lastName the last name of the user to create
+     * @param macAddress the mac address of the users device
+     * @param onSuccessListener the callback when the user is successfully created
+     * @param onFailureListener the callback when there is an error creating the user
+     */
+    public void createNewUser(final String userId,
+                              final String firstName,
+                              final String lastName,
+                              final String macAddress,
+                              @NonNull final OnSuccessListener<Void> onSuccessListener,
+                              @NonNull final OnFailureListener onFailureListener) {
+
+        final CollectionReference studentsRef = db.collection("students");
+        final DocumentReference docRef = studentsRef.document(userId);
+
+        Map<String, Object> user = new HashMap<>();
+        user.put("firstName", firstName);
+        user.put("lastName", lastName);
+        user.put("macAddress", macAddress);
+
+        docRef.set(user)
+                .addOnSuccessListener(onSuccessListener)
+                .addOnFailureListener(onFailureListener);
+
+    }
+
+}
+
