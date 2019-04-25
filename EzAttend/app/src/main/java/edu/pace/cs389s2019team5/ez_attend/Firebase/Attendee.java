@@ -11,6 +11,9 @@ import java.util.Date;
 public class Attendee {
 
     private final static String TAG = Attendee.class.getName();
+    public enum Mark {
+        PRESENT, LATE, ABSENT;
+    }
 
     public final static SnapshotParser<Attendee> SNAPSHOTPARSER = new SnapshotParser<Attendee>() {
         @NonNull

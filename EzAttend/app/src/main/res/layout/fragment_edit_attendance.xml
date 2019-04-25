@@ -4,52 +4,51 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ClassFragments.TeacherClassFragment">
+    tools:context=".AttendanceFragments.EditAttendanceFragment">
 
     <!-- TODO: Update blank fragment layout -->
-
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <Button
-            android:id="@+id/takeAttendanceButton"
-            style="@style/FirebaseUI.Button.AccountChooser.EmailButton"
-            android:layout_width="312dp"
+        <TextView
+            android:id="@+id/studentName"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="50dp"
             android:layout_marginLeft="50dp"
             android:layout_marginTop="50dp"
             android:layout_marginEnd="50dp"
             android:layout_marginRight="50dp"
-            android:drawableLeft="@drawable/ic_action_flash"
-            android:gravity="center|right"
-            android:text="@string/teacher_take_attendance"
-            android:textSize="18sp"
+            android:gravity="center"
+            android:text="@string/temp"
+            android:textColor="@android:color/black"
+            android:textSize="30sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/attendanceRecordsButton"
-            style="@style/FirebaseUI.Button.AccountChooser.AnonymousButton"
+            android:id="@+id/markPresentButton"
+            style="@style/FirebaseUI.Button.AccountChooser.EmailButton"
             android:layout_width="312dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="50dp"
             android:layout_marginLeft="50dp"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="100dp"
             android:layout_marginEnd="50dp"
             android:layout_marginRight="50dp"
-            android:drawableLeft="@drawable/ic_action_bargraph"
+            android:drawableLeft="@drawable/ic_action_like"
             android:gravity="center|right"
-            android:text="@string/attendance_records"
+            android:text="@string/mark_present"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/takeAttendanceButton" />
+            app:layout_constraintTop_toBottomOf="@+id/studentName" />
 
         <Button
-            android:id="@+id/exportRecordsButton"
+            android:id="@+id/markLateButton"
             style="@style/FirebaseUI.Button.AccountChooser.FacebookButton"
             android:layout_width="312dp"
             android:layout_height="wrap_content"
@@ -58,14 +57,33 @@
             android:layout_marginTop="50dp"
             android:layout_marginEnd="50dp"
             android:layout_marginRight="50dp"
-            android:drawableLeft="@drawable/ic_action_download"
+            android:drawableLeft="@drawable/ic_action_alarm"
             android:gravity="center|right"
-            android:text="@string/export_attendance"
+            android:text="@string/mark_late"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/attendanceRecordsButton" />
+            app:layout_constraintTop_toBottomOf="@+id/markPresentButton" />
 
+        <Button
+            android:id="@+id/markAbsentButton"
+            style="@style/FirebaseUI.Button.AccountChooser.AnonymousButton"
+            android:layout_width="312dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="50dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginEnd="50dp"
+            android:layout_marginRight="50dp"
+            android:drawableLeft="@drawable/ic_action_halt"
+            android:gravity="center|right"
+            android:text="@string/mark_absent"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/markLateButton" />
     </android.support.constraint.ConstraintLayout>
 
 </FrameLayout>

@@ -293,61 +293,26 @@ public class Controller {
                 });
     }
 
-
     /**
-     * Used by the teacher to mark a student present. This is specifically used for manual activation.
-     * This allows a teacher to change a student to present in a given class and class session.
+     * Used by the teacher to mark a student present, late, or absent. This is specifically used for
+     * manual activation. This allows a teacher to change a student to the specified mark in a given
+     * class and class session.
      *
-     * @param classId           the id of the class that the teacher is marking the student present for
-     * @param sessionId         the id of the session that the teacher is marking the student present for
-     * @param studentId         the id of the student that the teacher wishes to mark present
+     * @param classId           the id of the class that the teacher is marking the change to
+     * @param sessionId         the id of the session that the teacher is marking the change to
+     * @param studentId         the id of the student that the teacher wishes to change the mark for
+     * @param mark              the type of mark to make
      * @param onSuccessListener the callback when the student is successfully marked present
      * @param onFailureListener the callback when marking the student present fails
      */
-    public void markManualPresent(final String classId,
-                                final String sessionId,
-                                final String studentId,
-                                final OnSuccessListener<Void> onSuccessListener,
-                                final OnFailureListener onFailureListener) {
-
-    }
-
-    /**
-     * Used by the teacher to mark a student late. This is specifically used for manual activation.
-     * This allows a teacher to change a student to late in a given class and class session.
-     *
-     * @param classId           the id of the class that the teacher is marking the student late for
-     * @param sessionId         the id of the session that the teacher is marking the late late for
-     * @param studentId         the id of the student that the teacher wishes to mark present
-     * @param onSuccessListener the callback when the student is successfully marked late
-     * @param onFailureListener the callback when marking the student late fails
-     */
-    public void markManualLate(final String classId,
+    public void markManual(final String classId,
                                   final String sessionId,
                                   final String studentId,
+                                  final Enum mark,
                                   final OnSuccessListener<Void> onSuccessListener,
                                   final OnFailureListener onFailureListener) {
-
+        //TODO
     }
-
-    /**
-     * Used by the teacher to mark a student absent. This is specifically used for manual activation.
-     * This allows a teacher to change a student to absent in a given class and class session.
-     *
-     * @param classId           the id of the class that the teacher is marking the student absent for
-     * @param sessionId         the id of the session that the teacher is marking the student absent for
-     * @param studentId         the id of the student that the teacher wishes to mark absent
-     * @param onSuccessListener the callback when the student is successfully marked absent
-     * @param onFailureListener the callback when marking the student absent fails
-     */
-    public void markManualAbsent(final String classId,
-                                  final String sessionId,
-                                  final String studentId,
-                                  final OnSuccessListener<Void> onSuccessListener,
-                                  final OnFailureListener onFailureListener) {
-
-    }
-}
 
     /**
      * Creates a new user in firestore based on the provided user information.
