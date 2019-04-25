@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Attendee;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
 import edu.pace.cs389s2019team5.ez_attend.R;
 
@@ -58,73 +59,40 @@ public class EditAttendanceFragment extends Fragment {
         Button markPresent = v.findViewById(R.id.markPresentButton);
         markPresent.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                markPresent();
+                mark(Attendee.mark.PRESENT);
             }
         });
 
         Button markLate = v.findViewById(R.id.markLateButton);
         markLate.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                markLate();
+                mark(Attendee.mark.LATE);
             }
         });
 
         Button markAbsent = v.findViewById(R.id.markAbsentButton);
         markAbsent.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                markAbsent();
+                mark(Attendee.mark.ABSENT);
             }
         });
 
         return v;
     }
 
-    private void markPresent() {
+    private void mark(final Enum mark) {
         Controller c = new Controller();
-        c.markManualPresent(this.classId, this.sessionId, this.studentId, new OnSuccessListener<Void>() {
+        c.markManual(mark, this.classId, this.sessionId, this.studentId, new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                Log.i(TAG, "Successfully marked present");
+                Log.i(TAG, "Successfully marked "+ mark);
             }
         }, new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
 
-                Log.e(TAG, "Error when attempting to mark present", e);
+                Log.e(TAG, "Error when attempting to mark "+mark, e);
             }
         });
     }
-
-    private void markLate() {
-        Controller c = new Controller();
-        c.markManualLate(this.classId, this.sessionId, this.studentId, new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.i(TAG, "Successfully marked late");
-            }
-        }, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-
-                Log.e(TAG, "Error when attempting to mark late", e);
-            }
-        });
-    }
-
-    private void markAbsent() {
-        Controller c = new Controller();
-        c.markManualAbsent(this.classId, this.sessionId, this.studentId, new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.i(TAG, "Successfully marked absent");
-            }
-        }, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-
-                Log.e(TAG, "Error when attempting to mark absent", e);
-            }
-        });
-    }
-
 }
