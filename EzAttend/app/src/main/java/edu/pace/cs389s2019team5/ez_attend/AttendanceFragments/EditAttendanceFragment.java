@@ -60,21 +60,21 @@ public class EditAttendanceFragment extends Fragment {
         Button markPresent = v.findViewById(R.id.markPresentButton);
         markPresent.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                mark(Attendee.mark.PRESENT);
+                mark(Attendee.Mark.PRESENT);
             }
         });
 
         Button markLate = v.findViewById(R.id.markLateButton);
         markLate.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                mark(Attendee.mark.LATE);
+                mark(Attendee.Mark.LATE);
             }
         });
 
         Button markAbsent = v.findViewById(R.id.markAbsentButton);
         markAbsent.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                mark(Attendee.mark.ABSENT);
+                mark(Attendee.Mark.ABSENT);
             }
         });
 

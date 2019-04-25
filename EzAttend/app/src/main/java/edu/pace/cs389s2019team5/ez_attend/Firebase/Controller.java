@@ -298,16 +298,17 @@ public class Controller {
      * manual activation. This allows a teacher to change a student to the specified mark in a given
      * class and class session.
      *
-     * @param classId           the id of the class that the teacher is marking the student present for
-     * @param sessionId         the id of the session that the teacher is marking the student present for
-     * @param studentId         the id of the student that the teacher wishes to mark present
+     * @param classId           the id of the class that the teacher is marking the change to
+     * @param sessionId         the id of the session that the teacher is marking the change to
+     * @param studentId         the id of the student that the teacher wishes to change the mark for
+     * @param mark              the type of mark to make
      * @param onSuccessListener the callback when the student is successfully marked present
      * @param onFailureListener the callback when marking the student present fails
      */
-    public void markManual(final Enum mark,
-                                  final String classId,
+    public void markManual(final String classId,
                                   final String sessionId,
                                   final String studentId,
+                                  final Enum mark,
                                   final OnSuccessListener<Void> onSuccessListener,
                                   final OnFailureListener onFailureListener) {
         //TODO
