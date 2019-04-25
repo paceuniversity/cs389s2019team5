@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -85,6 +86,10 @@ public class EditAttendanceFragment extends Fragment {
         c.markManual(mark, this.classId, this.sessionId, this.studentId, new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
+                Toast.makeText(getActivity().getApplicationContext(),
+                        "Successfully marked "+ mark,
+                        Toast.LENGTH_SHORT).show();
+                getFragmentManager().popBackStack();
                 Log.i(TAG, "Successfully marked "+ mark);
             }
         }, new OnFailureListener() {
