@@ -1,5 +1,6 @@
 package edu.pace.cs389s2019team5.ez_attend;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -15,6 +16,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.Arrays;
 
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Student;
 
 public class MainActivity extends AppCompatActivity {
@@ -77,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkSignIn() {
-        FirebaseAuth auth = FirebaseAuth.getInstance();
+        final FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() != null) {
             edu.pace.cs389s2019team5.ez_attend.Firebase.View view = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
 
@@ -85,10 +87,56 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(Student student) {
                     if (student == null) {
-                        Log.d(TAG, "First time student signs in to this app");
-                        Intent intent = new Intent(MainActivity.this, StudentActivity.class);
-                        startActivity(intent);
-                        finish();
+                        Log.v(TAG, "First time student signs in to this app");
+
+                        final String userId, userFirstName, userLastName, userMacAddress;
+                        String[] userName = auth.getCurrentUser().getDisplayName().split(" ");
+                        userId = auth.getCurrentUser().getUid();
+
+                        // TODO THIS DOESN'T TAKE INTO ACCOUNT AN OTHER RANDOM STUFF THEY MAY
+                        // HAVE WRITTEN AS THEIR NAME
+                        if (userName.length == 1) {
+                            userFirstName = userName[0];
+                            userLastName = "";
+                        } else {
+                            userFirstName = userName[0];
+                            userLastName = userName[1];
+                        }
+
+                        if (BluetoothAdapter.getDefaultAdapter() == null) {
+                            Log.w(TAG, "No Bluetooth connected");
+                            userMacAddress = "noMac";
+                        } else {
+                            userMacAddress = BluetoothAdapter.getDefaultAdapter().getAddress();
+                        }
+
+                        Controller controller = new Controller();
+                        controller.createNewUser(userId,
+                                userFirstName,
+                                userLastName,
+                                userMacAddress,
+                                new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Intent intent = new Intent(MainActivity.this, ClassListActivity.class);
+
+                                        intent.putExtra(ClassListActivity.CURRENT_USER_TAG,
+                                                new Student(userId,
+                                                            userFirstName,
+                                                            userLastName,
+                                                            userMacAddress));
+
+                                        startActivity(intent);
+                                        finish();
+
+                                    }
+                                }, new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.e(TAG, "Error creating the user");
+                                    }
+                                });
+
                     } else {
                         Intent intent = new Intent(MainActivity.this, ClassListActivity.class);
                         intent.putExtra(ClassListActivity.CURRENT_USER_TAG, student);
