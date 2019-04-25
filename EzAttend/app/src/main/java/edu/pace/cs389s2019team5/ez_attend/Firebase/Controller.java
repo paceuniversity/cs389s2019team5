@@ -42,9 +42,9 @@ public class Controller {
         Map<String, Object> session = new HashMap<>();
         session.put("startTime", FieldValue.serverTimestamp());
 
-        db.collection("classes")
+        db.collection(Model.CLASSES)
                 .document(classId)
-                .collection("sessions")
+                .collection(Class.SESSIONS)
                 .add(session)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
@@ -59,7 +59,7 @@ public class Controller {
         // This adds the most recent session timestamp to the class itself. With this design,
         // the time might not match the start time of the session exactly. It may be better to do
         // this on Firebase instead but this is good enough for the most part.
-        db.collection("classes")
+        db.collection(Model.CLASSES)
                 .document(classId)
                 .update("mostRecent", FieldValue.serverTimestamp())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -94,7 +94,7 @@ public class Controller {
         classMap.put("name", className);
         classMap.put("teacherId", teacherId);
 
-        db.collection("classes")
+        db.collection(Model.CLASSES)
                 .add(classMap)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
@@ -122,7 +122,7 @@ public class Controller {
                           OnSuccessListener<Void> successListener,
                           OnFailureListener failureListener) {
 
-        DocumentReference classReference = db.collection("classes").document(classId);
+        DocumentReference classReference = db.collection(Model.CLASSES).document(classId);
 
         classReference.update("students", FieldValue.arrayUnion(studentId))
                 .addOnSuccessListener(successListener)
@@ -154,9 +154,9 @@ public class Controller {
                             final OnSuccessListener<Void> onSuccessListener,
                             final OnFailureListener onFailureListener) {
 
-        db.collection("classes")
+        db.collection(Model.CLASSES)
                 .document(classId)
-                .collection("sessions")
+                .collection(Class.SESSIONS)
                 .orderBy("startTime", Query.Direction.DESCENDING)
                 .limit(1)
                 .get()
@@ -173,9 +173,11 @@ public class Controller {
                         }
                         final DocumentSnapshot sessionSnapShot = (DocumentSnapshot) list.get(0);
 
-                        db.collection("classes")
+                        db.collection(Model.CLASSES)
                                 .document(classId)
-                                .collection("sessions/" + sessionSnapShot.getId() + "/attendees")
+                                .collection(Class.SESSIONS)
+                                .document(sessionSnapShot.getId())
+                                .collection(ClassSession.ATTENDEES)
                                 .document(studentId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                             @Override
                             public void onSuccess(DocumentSnapshot studentSnapshot) {
@@ -189,10 +191,14 @@ public class Controller {
                                     userTimeStamp.put("timeStamp", FieldValue.serverTimestamp());
 
                                     Log.i(TAG, "Marking student present for most recent session");
-                                    db.collection("classes")
+                                    db.collection(Model.CLASSES)
                                             .document(classId)
-                                            .collection("sessions/" + sessionSnapShot.getId() + "/attendees")
-                                            .document(studentId).set(userTimeStamp).addOnSuccessListener(onSuccessListener).addOnFailureListener(onFailureListener);
+                                            .collection(Class.SESSIONS)
+                                            .document(sessionSnapShot.getId())
+                                            .collection(ClassSession.ATTENDEES)
+                                            .document(studentId).set(userTimeStamp)
+                                            .addOnSuccessListener(onSuccessListener)
+                                            .addOnFailureListener(onFailureListener);
                                 }
                             }
                         }).addOnFailureListener(new OnFailureListener() {
@@ -231,9 +237,9 @@ public class Controller {
                                    final OnSuccessListener<Void> onSuccessListener,
                                    final OnFailureListener onFailureListener) {
 
-        db.collection("classes")
+        db.collection(Model.CLASSES)
                 .document(classId)
-                .collection("sessions")
+                .collection(Class.SESSIONS)
                 .orderBy("startTime", Query.Direction.DESCENDING)
                 .limit(1)
                 .get()
@@ -250,9 +256,11 @@ public class Controller {
                         }
                         final DocumentSnapshot sessionSnapShot = (DocumentSnapshot) list.get(0);
 
-                        db.collection("classes")
+                        db.collection(Model.CLASSES)
                                 .document(classId)
-                                .collection("sessions/" + sessionSnapShot.getId() + "/attendees")
+                                .collection(Class.SESSIONS)
+                                .document(sessionSnapShot.getId())
+                                .collection(ClassSession.ATTENDEES)
                                 .document(studentId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                             @Override
                             public void onSuccess(DocumentSnapshot studentSnapshot) {
@@ -266,9 +274,11 @@ public class Controller {
                                     userTimeStamp.put("teacherTimestamp", FieldValue.serverTimestamp());
 
                                     Log.i(TAG, "Marking student present for most recent session");
-                                    db.collection("classes")
+                                    db.collection(Model.CLASSES)
                                             .document(classId)
-                                            .collection("sessions/" + sessionSnapShot.getId() + "/attendees")
+                                            .collection(Class.SESSIONS)
+                                            .document(sessionSnapShot.getId())
+                                            .collection(ClassSession.ATTENDEES)
                                             .document(studentId).set(userTimeStamp)
                                             .addOnSuccessListener(onSuccessListener)
                                             .addOnFailureListener(onFailureListener);
@@ -316,10 +326,11 @@ public class Controller {
 
     /**
      * Creates a new user in firestore based on the provided user information.
-     * @param userId the user id of the signed in user. this is unique for this user
-     * @param firstName the first name of the user
-     * @param lastName the last name of the user to create
-     * @param macAddress the mac address of the users device
+     *
+     * @param userId            the user id of the signed in user. this is unique for this user
+     * @param firstName         the first name of the user
+     * @param lastName          the last name of the user to create
+     * @param macAddress        the mac address of the users device
      * @param onSuccessListener the callback when the user is successfully created
      * @param onFailureListener the callback when there is an error creating the user
      */
@@ -330,7 +341,7 @@ public class Controller {
                               @NonNull final OnSuccessListener<Void> onSuccessListener,
                               @NonNull final OnFailureListener onFailureListener) {
 
-        final CollectionReference studentsRef = db.collection("students");
+        final CollectionReference studentsRef = db.collection(Model.STUDENTS);
         final DocumentReference docRef = studentsRef.document(userId);
 
         Map<String, Object> user = new HashMap<>();

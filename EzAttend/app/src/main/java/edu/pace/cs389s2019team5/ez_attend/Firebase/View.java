@@ -33,13 +33,13 @@ public class View {
                             final OnSuccessListener<Class> onSuccessListener,
                             final OnFailureListener onFailureListener) {
 
-        db.collection("classes")
+        db.collection(Model.CLASSES)
                 .document(classId).get()
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
 
-                        Class m_class = Class.fromSnapshot(documentSnapshot);
+                        Class m_class = Class.SNAPSHOTPARSER.parseSnapshot(documentSnapshot);
                         onSuccessListener.onSuccess(m_class);
                     }
                 })
@@ -57,7 +57,7 @@ public class View {
                            final OnSuccessListener<Student> onSuccessListener,
                            OnFailureListener onFailureListener) {
 
-        DocumentReference docRef = db.collection("students").document(id);
+        DocumentReference docRef = db.collection(Model.STUDENTS).document(id);
         docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot snapshot) {
@@ -89,9 +89,9 @@ public class View {
                             final OnSuccessListener<ArrayList<ClassSession>> onSuccessListener,
                             OnFailureListener onFailureListener) {
 
-        db.collection("classes")
+        db.collection(Model.CLASSES)
                 .document(classId)
-                .collection("sessions")
+                .collection(Class.SESSIONS)
                 .orderBy("startTime")
                 .get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -124,9 +124,9 @@ public class View {
                                      final OnSuccessListener<ArrayList<Attendee>> onSuccessListener,
                                      OnFailureListener onFailureListener) {
 
-        CollectionReference attendeesCollection = db.collection("classes")
+        CollectionReference attendeesCollection = db.collection(Model.CLASSES)
                 .document(classId)
-                .collection("sessions")
+                .collection(Class.SESSIONS)
                 .document(session.getId())
                 .collection(ClassSession.ATTENDEES);
 
@@ -136,7 +136,7 @@ public class View {
                 ArrayList<Attendee> attendees = new ArrayList<>();
                 for (QueryDocumentSnapshot snap : snapshot) {
                     Log.d(TAG, "Got attendee with id: " + snap.getId());
-                    attendees.add(Attendee.fromSnapshot(snap));
+                    attendees.add(Attendee.SNAPSHOTPARSER.parseSnapshot(snap));
                 }
 
                 onSuccessListener.onSuccess(attendees);
@@ -166,7 +166,7 @@ public class View {
                             final OnFailureListener onFailureListener) {
 
         Log.i(TAG, "Getting stuff for " + attendeeId);
-        db.collection("classes")
+        db.collection(Model.CLASSES)
                 .document(classId)
                 .collection(Class.SESSIONS)
                 .document(sessionId)
@@ -177,7 +177,7 @@ public class View {
             public void onSuccess(DocumentSnapshot snapshot) {
                 // Convert the given snapshot to an attendee object
                 if (snapshot.exists()) {
-                    Attendee attendee = Attendee.fromSnapshot(snapshot);
+                    Attendee attendee = Attendee.SNAPSHOTPARSER.parseSnapshot(snapshot);
                     onSuccessListener.onSuccess(attendee);
                 } else {
                     onSuccessListener.onSuccess(null);
@@ -190,20 +190,22 @@ public class View {
     /**
      * Used by students to wait until they are marked present by their teacher.
      * @param classId the class id of the class that we want to listen on
-     * @param courseId the id of the session that we wish to listen on
+     * @param sessionId the id of the session that we wish to listen on
      * @param studentId the id of the student that we are interested in
      * @param eventListener the callback for what should happen when we receive an update on this
      *                      student
      * @return the listener registration so that the caller can cancel the listener
      */
     public ListenerRegistration listenForMarking(String classId,
-                                                 String courseId,
+                                                 String sessionId,
                                                  String studentId,
                                                  EventListener<DocumentSnapshot> eventListener) {
 
-        final DocumentReference docRef = db.collection("classes")
+        final DocumentReference docRef = db.collection(Model.CLASSES)
                 .document(classId)
-                .collection("sessions/ " + courseId + "/attendees")
+                .collection(Class.SESSIONS)
+                .document(sessionId)
+                .collection(ClassSession.ATTENDEES)
                 .document(studentId);
 
         return docRef.addSnapshotListener(eventListener);

@@ -25,6 +25,7 @@ import com.google.firebase.firestore.Query;
 import edu.pace.cs389s2019team5.ez_attend.ClassFragments.TeacherClassFragment;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Model;
 import edu.pace.cs389s2019team5.ez_attend.R;
 
 
@@ -69,8 +70,11 @@ public class TeacherFragment extends Fragment {
     }
 
     private void createAdapter() {
-        Query query = FirebaseFirestore.getInstance().collection("classes").whereEqualTo("teacherId",this.user);
-        FirestoreRecyclerOptions<Class> options = new FirestoreRecyclerOptions.Builder<Class>().setQuery(query, Class.SNAPSHOTPARSER).build();
+        Query query = FirebaseFirestore.getInstance()
+                .collection(Model.CLASSES)
+                .whereEqualTo("teacherId",this.user);
+        FirestoreRecyclerOptions<Class> options = new FirestoreRecyclerOptions.Builder<Class>()
+                .setQuery(query, Class.SNAPSHOTPARSER).build();
 
         this.adapter = new FirestoreRecyclerAdapter<Class, TeacherFragment.ClassHolder>(options) {
             @Override

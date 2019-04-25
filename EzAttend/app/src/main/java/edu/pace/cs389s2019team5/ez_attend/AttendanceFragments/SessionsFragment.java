@@ -18,7 +18,9 @@ import com.google.firebase.firestore.Query;
 
 import java.util.Calendar;
 
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.ClassSession;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Model;
 import edu.pace.cs389s2019team5.ez_attend.R;
 
 /**
@@ -55,7 +57,10 @@ public class SessionsFragment extends Fragment {
         this.classId = classId;
     }
     private void createAdapter() {
-        Query query = FirebaseFirestore.getInstance().collection("classes").document(classId).collection("sessions");
+        Query query = FirebaseFirestore.getInstance()
+                .collection(Model.CLASSES)
+                .document(classId)
+                .collection(Class.SESSIONS);
         FirestoreRecyclerOptions<ClassSession> options = new FirestoreRecyclerOptions.Builder<ClassSession>().setQuery(query, ClassSession.SNAPSHOTPARSER).build();
 
         this.adapter = new FirestoreRecyclerAdapter<ClassSession, SessionsFragment.ClassHolder>(options) {

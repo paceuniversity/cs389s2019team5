@@ -26,6 +26,7 @@ import edu.pace.cs389s2019team5.ez_attend.Firebase.Attendee;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.ClassSession;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Model;
 import edu.pace.cs389s2019team5.ez_attend.R;
 
 /**
@@ -145,7 +146,7 @@ public class StudentClassFragment extends Fragment {
         layoutManager = new LinearLayoutManager(getActivity());
 
         Query query = FirebaseFirestore.getInstance()
-                .collection("classes")
+                .collection(Model.CLASSES)
                 .document(classId)
                 .collection(Class.SESSIONS)
                 .orderBy("startTime", Query.Direction.DESCENDING);

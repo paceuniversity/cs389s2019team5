@@ -20,6 +20,7 @@ import com.google.firebase.firestore.Query;
 import edu.pace.cs389s2019team5.ez_attend.ClassFragments.StudentClassFragment;
 import edu.pace.cs389s2019team5.ez_attend.ClassFragments.TeacherClassFragment;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Model;
 import edu.pace.cs389s2019team5.ez_attend.R;
 
 public class RecentFragment extends Fragment {
@@ -72,11 +73,19 @@ public class RecentFragment extends Fragment {
 
 
     private void createAdapters() {
-        Query query = FirebaseFirestore.getInstance().collection("classes").whereEqualTo("teacherId", user).orderBy("mostRecent", Query.Direction.DESCENDING).limit(3);
+        Query query = FirebaseFirestore.getInstance()
+                .collection(Model.CLASSES)
+                .whereEqualTo("teacherId", user)
+                .orderBy("mostRecent", Query.Direction.DESCENDING)
+                .limit(3);
         FirestoreRecyclerOptions<Class> options = new FirestoreRecyclerOptions.Builder<Class>().setQuery(query, Class.SNAPSHOTPARSER).build();
         this.adapter1 = createAdapter(options);
 
-        Query query2 = FirebaseFirestore.getInstance().collection("classes").whereArrayContains("students", user).orderBy("mostRecent", Query.Direction.DESCENDING).limit(3);
+        Query query2 = FirebaseFirestore.getInstance()
+                .collection(Model.CLASSES)
+                .whereArrayContains("students", user)
+                .orderBy("mostRecent", Query.Direction.DESCENDING)
+                .limit(3);
         FirestoreRecyclerOptions<Class> options2 = new FirestoreRecyclerOptions.Builder<Class>().setQuery(query2, Class.SNAPSHOTPARSER).build();
         this.adapter2 = createAdapter(options2);
     }
