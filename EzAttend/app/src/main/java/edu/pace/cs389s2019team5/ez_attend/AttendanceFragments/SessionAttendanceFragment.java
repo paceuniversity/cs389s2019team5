@@ -53,7 +53,7 @@ public class SessionAttendanceFragment extends Fragment {
             edu.pace.cs389s2019team5.ez_attend.Firebase.View v = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
             v.getStudent(model.getId(), new OnSuccessListener<Student>() {
                 @Override
-                public void onSuccess(Student s) {
+                public void onSuccess(final Student s) {
 
                     // This caches the result in attendees so it doesn't reload every time the user
                     // scrolls through the attendance records
@@ -63,6 +63,19 @@ public class SessionAttendanceFragment extends Fragment {
                             model.getAttendeeStatus(SessionAttendanceFragment.this.getContext(),
                                     m_session.getStartTime(),
                                     600000));
+
+
+                    holder.m_attendeeId.setOnClickListener(new View.OnClickListener() {
+                        public void onClick(View view) {
+                            openStudent(classId, m_session.getId(), s.getId(), s.getFirstName()+" "+ s.getLastName());
+                        }
+                    });
+
+                    holder.m_attendeeStatus.setOnClickListener(new View.OnClickListener() {
+                        public void onClick(View view) {
+                            openStudent(classId, m_session.getId(), s.getId(), s.getFirstName()+" "+ s.getLastName());
+                        }
+                    });
 
                 }
             }, new OnFailureListener() {
@@ -87,6 +100,18 @@ public class SessionAttendanceFragment extends Fragment {
             return new AttendeeViewHolder(view);
         }
     }
+
+    private void openStudent(String classId, String sessionId, String studentId, String studentName) {
+        EditAttendanceFragment fragment = new EditAttendanceFragment();
+        fragment.setClassId(classId);
+        fragment.setSessionId(sessionId);
+        fragment.setStudentId(studentId);
+        fragment.setStudentName(studentName);
+        getFragmentManager().beginTransaction().replace(R.id.fragment_content, fragment).addToBackStack(TAG).commit();
+    }
+
+
+
 
     public class AttendeeViewHolder extends RecyclerView.ViewHolder {
 

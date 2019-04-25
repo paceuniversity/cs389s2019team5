@@ -73,13 +73,6 @@ public class TeacherClassFragment extends Fragment {
             }
         });
 
-//        Button addStudent = v.findViewById(R.id.addStudentButton);
-//        addStudent.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View v) {
-//                addStudent();
-//            }
-//        });
-
         return v;
     }
     public void showAttendance()

@@ -309,7 +309,7 @@ public class Controller {
                                 final String studentId,
                                 final OnSuccessListener<Void> onSuccessListener,
                                 final OnFailureListener onFailureListener) {
-
+        //TODO
     }
 
     /**
@@ -327,7 +327,7 @@ public class Controller {
                                   final String studentId,
                                   final OnSuccessListener<Void> onSuccessListener,
                                   final OnFailureListener onFailureListener) {
-
+        //TODO
     }
 
     /**
@@ -345,9 +345,8 @@ public class Controller {
                                   final String studentId,
                                   final OnSuccessListener<Void> onSuccessListener,
                                   final OnFailureListener onFailureListener) {
-
+        //TODO
     }
-}
 
     /**
      * Creates a new user in firestore based on the provided user information.
