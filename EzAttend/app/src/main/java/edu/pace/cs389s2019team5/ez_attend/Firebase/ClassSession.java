@@ -18,7 +18,7 @@ public class ClassSession {
     };
 
     private final static String TAG = ClassSession.class.getName();
-    public final static String ATTENDEES = "attendees";
+    final static String ATTENDEES = "attendees";
 
     private String id;
     private Date startTime;

@@ -10,6 +10,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -210,6 +211,62 @@ public class View {
 
         return docRef.addSnapshotListener(eventListener);
 
+    }
+
+    /**
+     * Get a query to go through the most recent classes being taught by the teacher with the
+     * provided teacher id
+     *
+     * @param teacherId the teacher id for the classes to query for
+     * @return the query reference
+     */
+    public Query getTeacherClassesQuery(String teacherId) {
+        return db.collection(Model.CLASSES)
+                .whereEqualTo("teacherId", teacherId)
+                .orderBy("mostRecent", Query.Direction.DESCENDING);
+    }
+
+    /**
+     * Get a query to query for the most recent classes in which the student with the provided
+     * student is enrolled in
+     *
+     * @param studentId the student id of the student to search for
+     * @return the query reference for this query
+     */
+    public Query getStudentClassesQuery(String studentId) {
+        return db.collection(Model.CLASSES)
+                .whereArrayContains("students", studentId)
+                .orderBy("mostRecent", Query.Direction.DESCENDING);
+    }
+
+    /**
+     * Get a query for the class sessions, ordered by their start time in descending order.
+     * This means that the most recent classes will come first
+     *
+     * @param classId the id of the class we are querying the sessions for
+     * @return the query reference for this query
+     */
+    public Query getClassSessionsQuery(String classId) {
+        return db.collection(Model.CLASSES)
+                .document(classId)
+                .collection(Class.SESSIONS)
+                .orderBy("startTime", Query.Direction.DESCENDING);
+    }
+
+    /**
+     * Get a query for the attendees of a provided class session.
+     *
+     * @param classId   the id of the class that the session is a part of
+     * @param sessionId the id of the session to query
+     * @return the query reference for this query
+     */
+    public Query getAttendeesQuery(String classId, String sessionId) {
+        return db
+                .collection("classes")
+                .document(classId)
+                .collection(Class.SESSIONS)
+                .document(sessionId)
+                .collection(ClassSession.ATTENDEES);
     }
 
 }

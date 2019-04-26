@@ -19,14 +19,11 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Attendee;
-import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.ClassSession;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
-import edu.pace.cs389s2019team5.ez_attend.Firebase.Model;
 import edu.pace.cs389s2019team5.ez_attend.R;
 
 /**
@@ -41,6 +38,9 @@ public class StudentClassFragment extends Fragment {
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
+
+    private edu.pace.cs389s2019team5.ez_attend.Firebase.View view;
+    private Controller controller;
 
     public class SessionAttendanceAdapter extends FirestoreRecyclerAdapter<ClassSession, SessionViewHolder> {
 
@@ -116,9 +116,9 @@ public class StudentClassFragment extends Fragment {
 
     }
 
-
     public StudentClassFragment() {
-
+        this.controller = new Controller();
+        this.view = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
     }
 
     public void setClassID(@NonNull String classID) {
@@ -145,11 +145,7 @@ public class StudentClassFragment extends Fragment {
 
         layoutManager = new LinearLayoutManager(getActivity());
 
-        Query query = FirebaseFirestore.getInstance()
-                .collection(Model.CLASSES)
-                .document(classId)
-                .collection(Class.SESSIONS)
-                .orderBy("startTime", Query.Direction.DESCENDING);
+        Query query = view.getClassSessionsQuery(this.classId);
 
         FirestoreRecyclerOptions<ClassSession> options = new FirestoreRecyclerOptions.Builder<ClassSession>()
                 .setQuery(query, ClassSession.SNAPSHOTPARSER)
