@@ -19,7 +19,13 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
+
+import javax.annotation.Nullable;
 
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Attendee;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.ClassSession;
@@ -53,7 +59,7 @@ public class StudentClassFragment extends Fragment {
                                         final int position,
                                         @NonNull final ClassSession model) {
 
-            Log.d(TAG, "Binding view holder");
+            Log.v(TAG, "onBindViewHolder");
             holder.m_sessionTime.setText(model.getStartTime().toString());
 
             // This caches the result in attendees so it doesn't reload every time the user
@@ -65,17 +71,35 @@ public class StudentClassFragment extends Fragment {
 
             final String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-            view.getAttendee(classId,
+            if (holder.m_listener != null) {
+                Log.d(TAG, "Removing listener");
+                holder.m_listener.remove();
+            }
+
+            holder.m_listener = view.listenForMarking(classId,
                     model.getId(),
                     userId,
-                    new OnSuccessListener<Attendee>() {
+                    new EventListener<DocumentSnapshot>() {
                         @Override
-                        public void onSuccess(Attendee attendee) {
-                            if (attendee == null) {
+                        public void onEvent(@Nullable DocumentSnapshot snapshot,
+                                            @Nullable FirebaseFirestoreException e) {
+
+                            if (snapshot == null) {
+                                Log.e(TAG, "Snapshot is null in the listener");
+                                return;
+                            }
+
+                            if (e != null) {
+                                Log.e(TAG, "Error from listening for attendee");
+                                return;
+                            }
+
+                            if (!snapshot.exists()) {
                                 holder.m_sessionStatus.setText(R.string.attendance_absent);
                             } else {
-                                // Before modifying the content of the adapter, we should make
-                                // sure it is still holding the right data
+                                Attendee attendee = Attendee.SNAPSHOTPARSER.parseSnapshot(snapshot);
+                                if (attendee.getStudentTimeStamp() == null)
+                                        return;
                                 if (holder.getAdapterPosition() == position)
                                     // This is equivalent to 10 minutes
                                     holder.m_sessionStatus.setText(
@@ -84,13 +108,18 @@ public class StudentClassFragment extends Fragment {
                                                     600000));
                             }
                         }
-                    }, new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.e(TAG, "Error adding to view holder", e);
-                        }
                     });
+            Log.d(TAG, "Adding listener in bind view");
+        }
 
+        @Override
+        public void onViewDetachedFromWindow(@NonNull SessionViewHolder holder) {
+            if (holder.m_listener != null) {
+                Log.d(TAG, "Detaching listener in onViewDetachedFromWindow");
+                holder.m_listener.remove();
+                holder.m_listener = null;
+            }
+            super.onViewDetachedFromWindow(holder);
         }
 
         @NonNull
@@ -106,12 +135,14 @@ public class StudentClassFragment extends Fragment {
 
         private TextView m_sessionTime;
         private TextView m_sessionStatus;
+        private ListenerRegistration m_listener;
 
         public SessionViewHolder(@NonNull View itemView) {
             super(itemView);
 
             this.m_sessionTime = itemView.findViewById(R.id.txtSessionStartTime);
             this.m_sessionStatus = itemView.findViewById(R.id.txtSessionAttendanceStatus);
+            this.m_listener = null;
         }
 
     }
@@ -153,7 +184,6 @@ public class StudentClassFragment extends Fragment {
 
         this.mAdapter = new SessionAttendanceAdapter(options);
         this.recyclerView.setLayoutManager(layoutManager);
-        this.recyclerView.setAdapter(this.mAdapter);
 
         return v;
     }
@@ -183,13 +213,17 @@ public class StudentClassFragment extends Fragment {
 
     @Override
     public void onStart() {
+        Log.v(TAG, "onStart()");
         super.onStart();
+        this.recyclerView.setAdapter(this.mAdapter);
         ((FirestoreRecyclerAdapter) this.mAdapter).startListening();
     }
 
     @Override
     public void onStop() {
+        Log.v(TAG, "onStop()");
         super.onStop();
+        this.recyclerView.setAdapter(null);
         ((FirestoreRecyclerAdapter) this.mAdapter).stopListening();
     }
 
