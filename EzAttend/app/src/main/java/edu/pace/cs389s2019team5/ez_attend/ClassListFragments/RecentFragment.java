@@ -14,13 +14,12 @@ import android.widget.Button;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import edu.pace.cs389s2019team5.ez_attend.ClassFragments.StudentClassFragment;
 import edu.pace.cs389s2019team5.ez_attend.ClassFragments.TeacherClassFragment;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
-import edu.pace.cs389s2019team5.ez_attend.Firebase.Model;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
 import edu.pace.cs389s2019team5.ez_attend.R;
 
 public class RecentFragment extends Fragment {
@@ -33,8 +32,14 @@ public class RecentFragment extends Fragment {
     private RecyclerView rv2;
     private RecyclerView.LayoutManager layoutManager1;
     private RecyclerView.LayoutManager layoutManager2;
+
+    private edu.pace.cs389s2019team5.ez_attend.Firebase.View view;
+    private Controller controller;
+
     public RecentFragment() {
         this.user = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        this.view = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
+        this.controller = new Controller();
     }
 
 
@@ -73,19 +78,11 @@ public class RecentFragment extends Fragment {
 
 
     private void createAdapters() {
-        Query query = FirebaseFirestore.getInstance()
-                .collection(Model.CLASSES)
-                .whereEqualTo("teacherId", user)
-                .orderBy("mostRecent", Query.Direction.DESCENDING)
-                .limit(3);
+        Query query = view.getTeacherClassesQuery(this.user).limit(3);
         FirestoreRecyclerOptions<Class> options = new FirestoreRecyclerOptions.Builder<Class>().setQuery(query, Class.SNAPSHOTPARSER).build();
         this.adapter1 = createAdapter(options);
 
-        Query query2 = FirebaseFirestore.getInstance()
-                .collection(Model.CLASSES)
-                .whereArrayContains("students", user)
-                .orderBy("mostRecent", Query.Direction.DESCENDING)
-                .limit(3);
+        Query query2 = view.getStudentClassesQuery(this.user).limit(3);
         FirestoreRecyclerOptions<Class> options2 = new FirestoreRecyclerOptions.Builder<Class>().setQuery(query2, Class.SNAPSHOTPARSER).build();
         this.adapter2 = createAdapter(options2);
     }

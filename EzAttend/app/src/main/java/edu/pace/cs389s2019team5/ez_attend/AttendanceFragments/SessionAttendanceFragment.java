@@ -16,12 +16,11 @@ import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Attendee;
-import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.ClassSession;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Student;
 import edu.pace.cs389s2019team5.ez_attend.R;
 
@@ -37,6 +36,9 @@ public class SessionAttendanceFragment extends Fragment {
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
+
+    private edu.pace.cs389s2019team5.ez_attend.Firebase.View view;
+    private Controller controller;
 
     public class SessionAttendanceAdapter extends FirestoreRecyclerAdapter<Attendee, AttendeeViewHolder> {
 
@@ -128,6 +130,8 @@ public class SessionAttendanceFragment extends Fragment {
     }
 
     public SessionAttendanceFragment() {
+        this.view = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
+        this.controller = new Controller();
     }
 
     public void setClassId(String classId) {
@@ -150,12 +154,7 @@ public class SessionAttendanceFragment extends Fragment {
 
         layoutManager = new LinearLayoutManager(getActivity());
 
-        Query query = FirebaseFirestore.getInstance()
-                .collection("classes")
-                .document(classId)
-                .collection(Class.SESSIONS)
-                .document(m_session.getId())
-                .collection(ClassSession.ATTENDEES);
+        Query query = view.getAttendeesQuery(this.classId, this.m_session.getId());
 
         FirestoreRecyclerOptions<Attendee> options = new FirestoreRecyclerOptions.Builder<Attendee>()
                 .setQuery(query, Attendee.SNAPSHOTPARSER)

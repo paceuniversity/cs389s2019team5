@@ -19,13 +19,11 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import edu.pace.cs389s2019team5.ez_attend.ClassFragments.StudentClassFragment;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
-import edu.pace.cs389s2019team5.ez_attend.Firebase.Model;
 import edu.pace.cs389s2019team5.ez_attend.R;
 
 
@@ -36,8 +34,14 @@ public class StudentFragment extends Fragment {
     private FirestoreRecyclerAdapter adapter;
     private RecyclerView rv;
     private RecyclerView.LayoutManager layoutManager;
+
+    private edu.pace.cs389s2019team5.ez_attend.Firebase.View view;
+    private Controller controller;
+
     public StudentFragment() {
         this.user = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        this.view = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
+        this.controller = new Controller();
     }
 
 
@@ -63,7 +67,7 @@ public class StudentFragment extends Fragment {
     }
 
     private void createAdapter() {
-        Query query = FirebaseFirestore.getInstance().collection(Model.CLASSES).whereArrayContains("students",this.user);
+        Query query = view.getStudentClassesQuery(this.user);
         FirestoreRecyclerOptions<Class> options = new FirestoreRecyclerOptions.Builder<Class>().setQuery(query, Class.SNAPSHOTPARSER).build();
 
         this.adapter = new FirestoreRecyclerAdapter<Class, StudentFragment.ClassHolder>(options) {
@@ -146,8 +150,6 @@ public class StudentFragment extends Fragment {
         super.onStop();
         this.adapter.stopListening();
     }
-
-
 
     public class ClassHolder extends RecyclerView.ViewHolder {
         public Button classSelection;
