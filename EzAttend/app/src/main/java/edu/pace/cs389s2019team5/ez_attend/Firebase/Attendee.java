@@ -11,6 +11,7 @@ import java.util.Date;
 public class Attendee {
 
     private final static String TAG = Attendee.class.getName();
+    public final static String TIMESTAMP = "timeStamp";
     public enum Mark {
         PRESENT, LATE, ABSENT;
     }

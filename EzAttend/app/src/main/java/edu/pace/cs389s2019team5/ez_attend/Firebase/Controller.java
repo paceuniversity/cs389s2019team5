@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -13,6 +14,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -315,14 +317,95 @@ public class Controller {
      * @param onSuccessListener the callback when the student is successfully marked present
      * @param onFailureListener the callback when marking the student present fails
      */
+    //TODO not sure if this will work for students who were initially absent
     public void markManual(final String classId,
                                   final String sessionId,
                                   final String studentId,
                                   final Enum mark,
                                   final OnSuccessListener<Void> onSuccessListener,
                                   final OnFailureListener onFailureListener) {
-        //TODO
+        db.collection(Model.CLASSES)
+                .document(classId)
+                .collection(Class.SESSIONS)
+                .document(sessionId)
+                .collection(ClassSession.ATTENDEES)
+                .document(studentId)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(final DocumentSnapshot snapStudent) {
+                        db.collection(Model.CLASSES)
+                                .document(classId)
+                                .collection(Class.SESSIONS)
+                                .document(sessionId)
+                                .get()
+                                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                    @Override
+                                    public void onSuccess(DocumentSnapshot snapSession) {
+                                        Timestamp time = (Timestamp) snapSession.get(ClassSession.STARTTIME);
+                                        Date date = time.toDate();
+                                        Map<String, Object> update = new HashMap<>();
+                                        if (mark == Attendee.Mark.PRESENT) {
+                                            update.put(Attendee.TIMESTAMP,date);
+                                        }
+                                        if (mark == Attendee.Mark.LATE) {
+                                            date = new Date(date.getTime() + (11 * 60000));;
+                                            update.put(Attendee.TIMESTAMP,date);
+                                        }
+                                        if (mark == Attendee.Mark.ABSENT) {
+                                            update.put(Attendee.TIMESTAMP, FieldValue.delete());
+                                        }
+                                        db.collection(Model.CLASSES)
+                                                .document(classId)
+                                                .collection(Class.SESSIONS)
+                                                .document(sessionId)
+                                                .collection(ClassSession.ATTENDEES)
+                                                .document(studentId)
+                                                .update(update)
+                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void aVoid) {
+                                                        onSuccessListener.onSuccess(aVoid);
+                                                        Log.i(TAG, "Successfully marked " + mark);
+                                                    }
+                                                })
+                                                .addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        Log.e(TAG, "Couldn't mark"+ mark, e);
+                                                        onFailureListener.onFailure(e);
+                                                    }
+                                                });
+
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.e(TAG, "Couldn't mark"+ mark, e);
+                                        onFailureListener.onFailure(e);
+                                    }
+                                });
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Couldn't mark"+ mark, e);
+                        onFailureListener.onFailure(e);
+                    }
+                });
     }
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Creates a new user in firestore based on the provided user information.

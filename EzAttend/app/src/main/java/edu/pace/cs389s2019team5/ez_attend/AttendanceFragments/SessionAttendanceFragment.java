@@ -28,6 +28,7 @@ import edu.pace.cs389s2019team5.ez_attend.R;
 /**
  * A simple {@link Fragment} subclass.
  */
+//TODO needs to handle absence
 public class SessionAttendanceFragment extends Fragment {
 
     private static final String TAG = SessionAttendanceFragment.class.getName();

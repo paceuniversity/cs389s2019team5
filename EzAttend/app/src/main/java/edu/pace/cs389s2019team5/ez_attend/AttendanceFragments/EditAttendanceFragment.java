@@ -71,12 +71,13 @@ public class EditAttendanceFragment extends Fragment {
             }
         });
 
-        Button markAbsent = v.findViewById(R.id.markAbsentButton);
-        markAbsent.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                mark(Attendee.Mark.ABSENT);
-            }
-        });
+        //TODO disabled due to absences not being handled
+//        Button markAbsent = v.findViewById(R.id.markAbsentButton);
+//        markAbsent.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View v) {
+//                mark(Attendee.Mark.ABSENT);
+//            }
+//        });
 
         return v;
     }
