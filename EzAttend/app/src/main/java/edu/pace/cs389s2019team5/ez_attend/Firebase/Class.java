@@ -12,7 +12,7 @@ import java.util.List;
 public class Class {
 
     private final static String TAG = Class.class.getName();
-    public final static String SESSIONS = "sessions";
+    final static String SESSIONS = "sessions";
     public final static SnapshotParser<Class> SNAPSHOTPARSER = new SnapshotParser<Class>() {
         @NonNull
         @Override

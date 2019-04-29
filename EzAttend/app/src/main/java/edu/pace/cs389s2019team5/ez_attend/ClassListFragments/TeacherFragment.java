@@ -19,13 +19,11 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import edu.pace.cs389s2019team5.ez_attend.ClassFragments.TeacherClassFragment;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
-import edu.pace.cs389s2019team5.ez_attend.Firebase.Model;
 import edu.pace.cs389s2019team5.ez_attend.R;
 
 
@@ -36,8 +34,14 @@ public class TeacherFragment extends Fragment {
     private FirestoreRecyclerAdapter adapter;
     private RecyclerView rv;
     private RecyclerView.LayoutManager layoutManager;
+
+    private edu.pace.cs389s2019team5.ez_attend.Firebase.View view;
+    private Controller controller;
+
     public TeacherFragment() {
         this.user = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        this.view = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
+        this.controller = new Controller();
     }
 
 
@@ -70,9 +74,7 @@ public class TeacherFragment extends Fragment {
     }
 
     private void createAdapter() {
-        Query query = FirebaseFirestore.getInstance()
-                .collection(Model.CLASSES)
-                .whereEqualTo("teacherId",this.user);
+        Query query = view.getTeacherClassesQuery(this.user);
         FirestoreRecyclerOptions<Class> options = new FirestoreRecyclerOptions.Builder<Class>()
                 .setQuery(query, Class.SNAPSHOTPARSER).build();
 
