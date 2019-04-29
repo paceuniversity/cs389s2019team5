@@ -317,7 +317,6 @@ public class Controller {
      * @param onSuccessListener the callback when the student is successfully marked present
      * @param onFailureListener the callback when marking the student present fails
      */
-    //TODO not sure if this will work for students who were initially absent
     public void markManual(final String classId,
                                   final String sessionId,
                                   final String studentId,
@@ -345,38 +344,66 @@ public class Controller {
                                         Timestamp time = (Timestamp) snapSession.get(ClassSession.STARTTIME);
                                         Date date = time.toDate();
                                         Map<String, Object> update = new HashMap<>();
+                                        boolean bool = false;
                                         if (mark == Attendee.Mark.PRESENT) {
                                             update.put(Attendee.TIMESTAMP,date);
+                                            bool = true;
                                         }
                                         if (mark == Attendee.Mark.LATE) {
                                             date = new Date(date.getTime() + (11 * 60000));;
                                             update.put(Attendee.TIMESTAMP,date);
+                                            bool = true;
                                         }
                                         if (mark == Attendee.Mark.ABSENT) {
                                             update.put(Attendee.TIMESTAMP, FieldValue.delete());
                                         }
-                                        db.collection(Model.CLASSES)
-                                                .document(classId)
-                                                .collection(Class.SESSIONS)
-                                                .document(sessionId)
-                                                .collection(ClassSession.ATTENDEES)
-                                                .document(studentId)
-                                                .update(update)
-                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                    @Override
-                                                    public void onSuccess(Void aVoid) {
-                                                        onSuccessListener.onSuccess(aVoid);
-                                                        Log.i(TAG, "Successfully marked " + mark);
-                                                    }
-                                                })
-                                                .addOnFailureListener(new OnFailureListener() {
-                                                    @Override
-                                                    public void onFailure(@NonNull Exception e) {
-                                                        Log.e(TAG, "Couldn't mark"+ mark, e);
-                                                        onFailureListener.onFailure(e);
-                                                    }
-                                                });
-
+                                        if(bool) {
+                                            db.collection(Model.CLASSES)
+                                                    .document(classId)
+                                                    .collection(Class.SESSIONS)
+                                                    .document(sessionId)
+                                                    .collection(ClassSession.ATTENDEES)
+                                                    .document(studentId)
+                                                    .set(update)
+                                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                        @Override
+                                                        public void onSuccess(Void aVoid) {
+                                                            onSuccessListener.onSuccess(aVoid);
+                                                            Log.i(TAG, "Successfully marked " + mark);
+                                                        }
+                                                    })
+                                                    .addOnFailureListener(new OnFailureListener() {
+                                                        @Override
+                                                        public void onFailure(@NonNull Exception e) {
+                                                            Log.e(TAG, "Couldn't mark" + mark, e);
+                                                            onFailureListener.onFailure(e);
+                                                        }
+                                                    });
+                                        }
+                                        else
+                                        {
+                                            db.collection(Model.CLASSES)
+                                                    .document(classId)
+                                                    .collection(Class.SESSIONS)
+                                                    .document(sessionId)
+                                                    .collection(ClassSession.ATTENDEES)
+                                                    .document(studentId)
+                                                    .delete()
+                                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                        @Override
+                                                        public void onSuccess(Void aVoid) {
+                                                            onSuccessListener.onSuccess(aVoid);
+                                                            Log.i(TAG, "Successfully marked " + mark);
+                                                        }
+                                                    })
+                                                    .addOnFailureListener(new OnFailureListener() {
+                                                        @Override
+                                                        public void onFailure(@NonNull Exception e) {
+                                                            Log.e(TAG, "Couldn't mark" + mark, e);
+                                                            onFailureListener.onFailure(e);
+                                                        }
+                                                    });
+                                        }
                                     }
                                 })
                                 .addOnFailureListener(new OnFailureListener() {
