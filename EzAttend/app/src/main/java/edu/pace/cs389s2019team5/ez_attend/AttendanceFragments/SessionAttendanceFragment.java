@@ -169,30 +169,33 @@ public class SessionAttendanceFragment extends Fragment {
             @Override
             public void onSuccess(final Class c)
             {
-                Task<QuerySnapshot> query = view.getAttendeesQuery(classId, m_session.getId()).get();
-                while(!query.isComplete());
-                ArrayList<Attendee> list = new ArrayList<>();
-                List<DocumentSnapshot> snaps = query.getResult().getDocuments();
-                for(DocumentSnapshot s:snaps)
-                {
-                    list.add(Attendee.SNAPSHOTPARSER.parseSnapshot(s));
-                }
-                Iterator<String> students = c.getStudentIdsIterator();
-                while(students.hasNext())
-                {
-                    String temp = students.next();
-                    boolean cpy = true;
-                    for(Attendee a:list)
-                    {
-                        if(a.getId().equals(temp))
-                            cpy=false;
+                view.getSessionAttendance(classId, m_session, new OnSuccessListener<ArrayList<Attendee>>() {
+                    @Override
+                    public void onSuccess(ArrayList<Attendee> attendees) {
+                        ArrayList<Attendee> list = attendees;
+                        Iterator<String> students = c.getStudentIdsIterator();
+                        while(students.hasNext())
+                        {
+                            String temp = students.next();
+                            boolean cpy = true;
+                            for(Attendee a:list)
+                            {
+                                if(a.getId().equals(temp))
+                                    cpy=false;
+                            }
+                            if(cpy)
+                                list.add(new Attendee(temp,null,null));
+                        }
+                        mAdapter = new SessionAttendanceAdapter(list);
+                        recyclerView.setLayoutManager(layoutManager);
+                        recyclerView.setAdapter(mAdapter);
                     }
-                    if(cpy)
-                        list.add(new Attendee(temp,null,null));
-                }
-                mAdapter = new SessionAttendanceAdapter(list);
-                recyclerView.setLayoutManager(layoutManager);
-                recyclerView.setAdapter(mAdapter);
+                }, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Error when attempting to get attendees", e);
+                    }
+                });
             }
         }, new OnFailureListener() {
             @Override
