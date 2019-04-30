@@ -56,7 +56,7 @@ public class Attendee {
         try {
             studentArrival = this.getStudentTimeStamp().getTime();
         }
-        catch(Exception e)
+        catch(NullPointerException e)
         {
             return context.getResources().getString(edu.pace.cs389s2019team5.ez_attend.R.string.attendance_absent);
         }
