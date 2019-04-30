@@ -17,8 +17,10 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.firebase.ui.firestore.ObservableSnapshotArray;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -41,7 +43,6 @@ public class SessionAttendanceFragment extends Fragment {
     private static final String TAG = SessionAttendanceFragment.class.getName();
     private String classId;
     private ClassSession m_session;
-    private Class currClass;
 
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
@@ -146,20 +147,6 @@ public class SessionAttendanceFragment extends Fragment {
 
     public void setClassId(String classId) {
         this.classId = classId;
-
-        view.getClass(classId,  new OnSuccessListener<Class>() {
-            @Override
-            public void onSuccess(final Class c)
-            {
-                currClass = c;
-            }
-        }, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-
-                Log.e(TAG, "Error when attempting to get class", e);
-            }
-        });
     }
 
     public void setSession(ClassSession session) {
@@ -178,22 +165,42 @@ public class SessionAttendanceFragment extends Fragment {
 
         layoutManager = new LinearLayoutManager(getActivity());
 
-        Query query = view.getAttendeesQuery(classId, m_session.getId());
-        ArrayList<Attendee> list = new ArrayList<>();
-        List<DocumentSnapshot> snaps = query.get().getResult().getDocuments();
-        for(DocumentSnapshot s:snaps)
-        {
-            list.add(Attendee.SNAPSHOTPARSER.parseSnapshot(s));
-        }
-        Iterator<String> students = currClass.getStudentIdsIterator();
-        while(students.hasNext())
-        {
-            list.add(new Attendee(students.next(),null,null));
-        }
-        mAdapter = new SessionAttendanceAdapter(list);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(mAdapter);
+        view.getClass(classId,  new OnSuccessListener<Class>() {
+            @Override
+            public void onSuccess(final Class c)
+            {
+                Task<QuerySnapshot> query = view.getAttendeesQuery(classId, m_session.getId()).get();
+                while(!query.isComplete());
+                ArrayList<Attendee> list = new ArrayList<>();
+                List<DocumentSnapshot> snaps = query.getResult().getDocuments();
+                for(DocumentSnapshot s:snaps)
+                {
+                    list.add(Attendee.SNAPSHOTPARSER.parseSnapshot(s));
+                }
+                Iterator<String> students = c.getStudentIdsIterator();
+                while(students.hasNext())
+                {
+                    String temp = students.next();
+                    boolean cpy = true;
+                    for(Attendee a:list)
+                    {
+                        if(a.getId().equals(temp))
+                            cpy=false;
+                    }
+                    if(cpy)
+                        list.add(new Attendee(temp,null,null));
+                }
+                mAdapter = new SessionAttendanceAdapter(list);
+                recyclerView.setLayoutManager(layoutManager);
+                recyclerView.setAdapter(mAdapter);
+            }
+        }, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
 
+                Log.e(TAG, "Error when attempting to get class", e);
+            }
+        });
 
         return v;
     }
