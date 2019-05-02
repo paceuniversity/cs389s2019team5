@@ -80,19 +80,15 @@ public class StudentClassFragment extends Fragment {
                     new OnSuccessListener<Attendee>() {
                         @Override
                         public void onSuccess(Attendee attendee) {
+                            if (holder.getAdapterPosition() != position) return;
                             if (attendee == null) {
                                 holder.m_sessionStatus.setText(R.string.attendance_absent);
                             } else {
-                                if (!Model.BLUETOOTH && attendee.getStudentTimeStamp() == null)
-                                    return;
-                                if (Model.BLUETOOTH && attendee.getTeacherTimeStamp() == null)
-                                    return;
-                                if (holder.getAdapterPosition() == position)
-                                    // This is equivalent to 10 minutes
-                                    holder.m_sessionStatus.setText(
-                                            attendee.getAttendeeStatus(StudentClassFragment.this.getActivity(),
-                                                    model.getStartTime(),
-                                                    600000));
+                                // This is equivalent to 10 minutes
+                                holder.m_sessionStatus.setText(
+                                        attendee.getAttendeeStatus(StudentClassFragment.this.getActivity(),
+                                                model.getStartTime(),
+                                                600000));
                             }
                         }
                     }, new OnFailureListener() {

@@ -12,20 +12,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
-import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.firebase.ui.firestore.ObservableSnapshotArray;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.ListenerRegistration;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Attendee;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
@@ -37,7 +29,6 @@ import edu.pace.cs389s2019team5.ez_attend.R;
 /**
  * A simple {@link Fragment} subclass.
  */
-//TODO needs to handle absence
 public class SessionAttendanceFragment extends Fragment {
 
     private static final String TAG = SessionAttendanceFragment.class.getName();
@@ -53,48 +44,75 @@ public class SessionAttendanceFragment extends Fragment {
 
     public class SessionAttendanceAdapter extends RecyclerView.Adapter<AttendeeViewHolder>
     {
-        private ArrayList<Attendee> attendees;
-        public SessionAttendanceAdapter(ArrayList<Attendee> attendees) {
-            this.attendees = attendees;
+        private ArrayList<String> attendeeIds;
+        public SessionAttendanceAdapter(ArrayList<String> attendees) {
+            this.attendeeIds = attendees;
         }
 
         @Override
         public int getItemCount() {
-            return attendees.size();
+            return attendeeIds.size();
         }
 
         @Override
         public void onBindViewHolder(@NonNull final AttendeeViewHolder holder,
-                                        final int position) {
+                                     final int position) {
 
             Log.d(TAG, "Binding view holder");
             edu.pace.cs389s2019team5.ez_attend.Firebase.View v = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
-            v.getStudent(attendees.get(position).getId(), new OnSuccessListener<Student>() {
+
+            if (holder.m_listener != null) {
+                Log.d(TAG, "Removing listener");
+                holder.m_listener.remove();
+            }
+
+            v.getStudent(attendeeIds.get(position), new OnSuccessListener<Student>() {
                 @Override
                 public void onSuccess(final Student s) {
-
                     // This caches the result in attendees so it doesn't reload every time the user
-                    // scrolls through the attendance records
+                    // scrolls through the attendance records...haha not anymore
 
-                    holder.m_attendeeId.setText(s.getFirstName()+" "+ s.getLastName());
-                    holder.m_attendeeStatus.setText(
-                            attendees.get(position).getAttendeeStatus(SessionAttendanceFragment.this.getContext(),
-                                    m_session.getStartTime(),
-                                    600000));
+                    if (position != holder.getAdapterPosition()) return;
 
+                    holder.m_attendeeId.setText(s.getFirstName() + " " + s.getLastName());
+
+                    holder.m_attendeeStatus.setText(R.string.attendance_loading);
+
+                    holder.m_listener = view.listenForMarking(classId,
+                            m_session.getId(),
+                            s.getId(),
+                            new OnSuccessListener<Attendee>() {
+                                @Override
+                                public void onSuccess(Attendee attendee) {
+                                    if (holder.getAdapterPosition() != position) return;
+                                    if (attendee == null) {
+                                        holder.m_attendeeStatus.setText(R.string.attendance_absent);
+                                    } else {
+                                        // This is equivalent to 10 minutes
+                                        holder.m_attendeeStatus.setText(
+                                                attendee.getAttendeeStatus(SessionAttendanceFragment.this.getActivity(),
+                                                        m_session.getStartTime(),
+                                                        600000));
+                                    }
+                                }
+                            }, new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.e(TAG, "Error getting student attendance", e);
+                                }
+                            });
 
                     holder.m_attendeeId.setOnClickListener(new View.OnClickListener() {
                         public void onClick(View view) {
-                            openStudent(classId, m_session.getId(), s.getId(), s.getFirstName()+" "+ s.getLastName());
+                            openStudent(classId, m_session.getId(), s.getId(), s.getFirstName() + " " + s.getLastName());
                         }
                     });
 
                     holder.m_attendeeStatus.setOnClickListener(new View.OnClickListener() {
                         public void onClick(View view) {
-                            openStudent(classId, m_session.getId(), s.getId(), s.getFirstName()+" "+ s.getLastName());
+                            openStudent(classId, m_session.getId(), s.getId(), s.getFirstName() + " " + s.getLastName());
                         }
                     });
-
                 }
             }, new OnFailureListener() {
                 @Override
@@ -103,6 +121,16 @@ public class SessionAttendanceFragment extends Fragment {
                     Log.e(TAG, "Error when attempting to display attendee", e);
                 }
             });
+        }
+
+        @Override
+        public void onViewDetachedFromWindow(@NonNull AttendeeViewHolder holder) {
+            if (holder.m_listener != null) {
+                Log.d(TAG, "Detaching listener in onViewDetachedFromWindow");
+                holder.m_listener.remove();
+                holder.m_listener = null;
+            }
+            super.onViewDetachedFromWindow(holder);
         }
 
         @NonNull
@@ -130,12 +158,14 @@ public class SessionAttendanceFragment extends Fragment {
 
         private TextView m_attendeeId;
         private TextView m_attendeeStatus;
+        private ListenerRegistration m_listener;
 
         public AttendeeViewHolder(@NonNull View itemView) {
             super(itemView);
 
             this.m_attendeeId = itemView.findViewById(R.id.txtSessionStartTime);
             this.m_attendeeStatus = itemView.findViewById(R.id.txtSessionAttendanceStatus);
+            this.m_listener = null;
         }
 
     }
@@ -169,33 +199,17 @@ public class SessionAttendanceFragment extends Fragment {
             @Override
             public void onSuccess(final Class c)
             {
-                view.getSessionAttendance(classId, m_session, new OnSuccessListener<ArrayList<Attendee>>() {
-                    @Override
-                    public void onSuccess(ArrayList<Attendee> attendees) {
-                        ArrayList<Attendee> list = attendees;
-                        Iterator<String> students = c.getStudentIdsIterator();
-                        while(students.hasNext())
-                        {
-                            String temp = students.next();
-                            boolean cpy = true;
-                            for(Attendee a:list)
-                            {
-                                if(a.getId().equals(temp))
-                                    cpy=false;
-                            }
-                            if(cpy)
-                                list.add(new Attendee(temp,null,null));
-                        }
-                        mAdapter = new SessionAttendanceAdapter(list);
-                        recyclerView.setLayoutManager(layoutManager);
-                        recyclerView.setAdapter(mAdapter);
-                    }
-                }, new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "Error when attempting to get attendees", e);
-                    }
-                });
+
+                ArrayList<String> list = new ArrayList<>();
+                Iterator<String> studentIds = c.getStudentIdsIterator();
+                while (studentIds.hasNext()) {
+                    list.add(studentIds.next());
+                }
+
+                mAdapter = new SessionAttendanceAdapter(list);
+                recyclerView.setLayoutManager(layoutManager);
+                recyclerView.setAdapter(mAdapter);
+
             }
         }, new OnFailureListener() {
             @Override
@@ -204,18 +218,19 @@ public class SessionAttendanceFragment extends Fragment {
                 Log.e(TAG, "Error when attempting to get class", e);
             }
         });
-
         return v;
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        this.recyclerView.setAdapter(this.mAdapter);
     }
 
     @Override
     public void onStop() {
         super.onStop();
+        this.recyclerView.setAdapter(null);
     }
 
 }
