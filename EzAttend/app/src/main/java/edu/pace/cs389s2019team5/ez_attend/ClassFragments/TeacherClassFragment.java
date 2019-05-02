@@ -152,8 +152,6 @@ public class TeacherClassFragment extends Fragment {
 
     public void exportAttendance() {
 
-        //this.classID = Controller.DEBUG_CLASS_ID;//DELETE. USE ONLY FOR TESTING!!!!!
-
         final edu.pace.cs389s2019team5.ez_attend.Firebase.View v = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
         sessionsOld = new ArrayList<>();
         sessionsNew = new Hashtable<>();
