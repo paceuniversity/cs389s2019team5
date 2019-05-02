@@ -14,6 +14,8 @@ public class Class {
     private final static String TAG = Class.class.getName();
     final static String SESSIONS = "sessions";
     final static String STUDENTS = "students";
+    public final static String MOSTRECENT = "mostRecent";
+    public final static String TEACHERID = "teacherId";
     public final static SnapshotParser<Class> SNAPSHOTPARSER = new SnapshotParser<Class>() {
         @NonNull
         @Override

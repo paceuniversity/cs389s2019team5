@@ -222,8 +222,7 @@ public class View {
      */
     public Query getTeacherClassesQuery(String teacherId) {
         return db.collection(Model.CLASSES)
-                .whereEqualTo("teacherId", teacherId)
-                .orderBy("mostRecent", Query.Direction.DESCENDING);
+                .whereEqualTo(Class.TEACHERID, teacherId);
     }
 
     /**
@@ -235,8 +234,7 @@ public class View {
      */
     public Query getStudentClassesQuery(String studentId) {
         return db.collection(Model.CLASSES)
-                .whereArrayContains("students", studentId)
-                .orderBy("mostRecent", Query.Direction.DESCENDING);
+                .whereArrayContains(Class.STUDENTS, studentId);
     }
 
     /**

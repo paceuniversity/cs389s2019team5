@@ -78,11 +78,11 @@ public class RecentFragment extends Fragment {
 
 
     private void createAdapters() {
-        Query query = view.getTeacherClassesQuery(this.user).limit(3);
+        Query query = view.getTeacherClassesQuery(this.user).orderBy(Class.MOSTRECENT, Query.Direction.DESCENDING).limit(3);
         FirestoreRecyclerOptions<Class> options = new FirestoreRecyclerOptions.Builder<Class>().setQuery(query, Class.SNAPSHOTPARSER).build();
         this.adapter1 = createAdapter(options);
 
-        Query query2 = view.getStudentClassesQuery(this.user).limit(3);
+        Query query2 = view.getStudentClassesQuery(this.user).orderBy(Class.MOSTRECENT, Query.Direction.DESCENDING).limit(3);
         FirestoreRecyclerOptions<Class> options2 = new FirestoreRecyclerOptions.Builder<Class>().setQuery(query2, Class.SNAPSHOTPARSER).build();
         this.adapter2 = createAdapter(options2);
     }
