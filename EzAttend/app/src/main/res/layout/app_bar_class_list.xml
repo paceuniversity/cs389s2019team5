@@ -7,10 +7,12 @@
     tools:context=".ClassListActivity">
 
     <android.support.design.widget.AppBarLayout
+        android:id="@+id/actionBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        android:theme="@style/Base.AlertDialog.AppCompat.Light">
+        android:theme="@style/Base.AlertDialog.AppCompat.Light"
+        android:visibility="visible">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"

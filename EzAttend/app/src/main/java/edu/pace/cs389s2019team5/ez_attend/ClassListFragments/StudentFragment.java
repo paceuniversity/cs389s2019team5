@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -63,6 +64,7 @@ public class StudentFragment extends Fragment {
         this.layoutManager = new LinearLayoutManager(this.getActivity());
         this.rv.setLayoutManager(this.layoutManager);
         this.rv.setAdapter(this.adapter);
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Student");
         return v;
     }
 
