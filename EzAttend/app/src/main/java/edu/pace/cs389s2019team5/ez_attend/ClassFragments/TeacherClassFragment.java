@@ -2,12 +2,16 @@ package edu.pace.cs389s2019team5.ez_attend.ClassFragments;
 
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +21,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.opencsv.CSVWriter;
 
 import java.io.File;
@@ -231,10 +236,22 @@ public class TeacherClassFragment extends Fragment {
                     writer.writeNext(entry);
                 }
                 writer.close();
+                openEmail(file, FirebaseAuth.getInstance().getCurrentUser().getEmail());
             }
         } catch (IOException e) {
             Log.e(TAG, "Error when attempting to export attendance", e);
         }
+    }
+    private void openEmail(File f, String email)
+    {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_EMAIL, new String[] {email});
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Attendance");
+        Uri uri = FileProvider.getUriForFile(getActivity(), "edu.pace.cs389s2019team5.ez_attend.fileprovider", f);
+        getActivity().grantUriPermission("edu.pace.cs389s2019team5.ez_attend.ClassFragments", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
+        startActivity(Intent.createChooser(intent, "Create email"));
     }
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();

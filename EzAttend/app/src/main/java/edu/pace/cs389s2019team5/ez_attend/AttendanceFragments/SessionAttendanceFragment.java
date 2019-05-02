@@ -14,11 +14,21 @@ import android.widget.TextView;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.firebase.ui.firestore.ObservableSnapshotArray;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Attendee;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.ClassSession;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Student;
@@ -27,6 +37,7 @@ import edu.pace.cs389s2019team5.ez_attend.R;
 /**
  * A simple {@link Fragment} subclass.
  */
+//TODO needs to handle absence
 public class SessionAttendanceFragment extends Fragment {
 
     private static final String TAG = SessionAttendanceFragment.class.getName();
@@ -40,20 +51,25 @@ public class SessionAttendanceFragment extends Fragment {
     private edu.pace.cs389s2019team5.ez_attend.Firebase.View view;
     private Controller controller;
 
-    public class SessionAttendanceAdapter extends FirestoreRecyclerAdapter<Attendee, AttendeeViewHolder> {
-
-        public SessionAttendanceAdapter(@NonNull FirestoreRecyclerOptions<Attendee> options) {
-            super(options);
+    public class SessionAttendanceAdapter extends RecyclerView.Adapter<AttendeeViewHolder>
+    {
+        private ArrayList<Attendee> attendees;
+        public SessionAttendanceAdapter(ArrayList<Attendee> attendees) {
+            this.attendees = attendees;
         }
 
         @Override
-        protected void onBindViewHolder(@NonNull final AttendeeViewHolder holder,
-                                        final int position,
-                                        @NonNull final Attendee model) {
+        public int getItemCount() {
+            return attendees.size();
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull final AttendeeViewHolder holder,
+                                        final int position) {
 
             Log.d(TAG, "Binding view holder");
             edu.pace.cs389s2019team5.ez_attend.Firebase.View v = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
-            v.getStudent(model.getId(), new OnSuccessListener<Student>() {
+            v.getStudent(attendees.get(position).getId(), new OnSuccessListener<Student>() {
                 @Override
                 public void onSuccess(final Student s) {
 
@@ -62,7 +78,7 @@ public class SessionAttendanceFragment extends Fragment {
 
                     holder.m_attendeeId.setText(s.getFirstName()+" "+ s.getLastName());
                     holder.m_attendeeStatus.setText(
-                            model.getAttendeeStatus(SessionAttendanceFragment.this.getContext(),
+                            attendees.get(position).getAttendeeStatus(SessionAttendanceFragment.this.getContext(),
                                     m_session.getStartTime(),
                                     600000));
 
@@ -87,11 +103,6 @@ public class SessionAttendanceFragment extends Fragment {
                     Log.e(TAG, "Error when attempting to display attendee", e);
                 }
             });
-
-
-
-
-
         }
 
         @NonNull
@@ -154,15 +165,45 @@ public class SessionAttendanceFragment extends Fragment {
 
         layoutManager = new LinearLayoutManager(getActivity());
 
-        Query query = view.getAttendeesQuery(this.classId, this.m_session.getId());
+        view.getClass(classId,  new OnSuccessListener<Class>() {
+            @Override
+            public void onSuccess(final Class c)
+            {
+                view.getSessionAttendance(classId, m_session, new OnSuccessListener<ArrayList<Attendee>>() {
+                    @Override
+                    public void onSuccess(ArrayList<Attendee> attendees) {
+                        ArrayList<Attendee> list = attendees;
+                        Iterator<String> students = c.getStudentIdsIterator();
+                        while(students.hasNext())
+                        {
+                            String temp = students.next();
+                            boolean cpy = true;
+                            for(Attendee a:list)
+                            {
+                                if(a.getId().equals(temp))
+                                    cpy=false;
+                            }
+                            if(cpy)
+                                list.add(new Attendee(temp,null,null));
+                        }
+                        mAdapter = new SessionAttendanceAdapter(list);
+                        recyclerView.setLayoutManager(layoutManager);
+                        recyclerView.setAdapter(mAdapter);
+                    }
+                }, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Error when attempting to get attendees", e);
+                    }
+                });
+            }
+        }, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
 
-        FirestoreRecyclerOptions<Attendee> options = new FirestoreRecyclerOptions.Builder<Attendee>()
-                .setQuery(query, Attendee.SNAPSHOTPARSER)
-                .build();
-
-        this.mAdapter = new SessionAttendanceAdapter(options);
-        this.recyclerView.setLayoutManager(layoutManager);
-        this.recyclerView.setAdapter(this.mAdapter);
+                Log.e(TAG, "Error when attempting to get class", e);
+            }
+        });
 
         return v;
     }
@@ -170,13 +211,11 @@ public class SessionAttendanceFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        ((FirestoreRecyclerAdapter) this.mAdapter).startListening();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        ((FirestoreRecyclerAdapter) this.mAdapter).stopListening();
     }
 
 }
