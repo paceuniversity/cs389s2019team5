@@ -51,7 +51,12 @@ public class Attendee {
 
         // Check if student is late
         long startInMillis = startTime.getTime();
-        long studentArrival = this.getStudentTimeStamp().getTime();
+        long studentArrival;
+        if (!Model.BLUETOOTH)
+            studentArrival = this.getStudentTimeStamp().getTime();
+        else
+            studentArrival = this.getTeacherTimeStamp().getTime();
+
         startInMillis += timeToLate;
 
         if (startInMillis < studentArrival) {

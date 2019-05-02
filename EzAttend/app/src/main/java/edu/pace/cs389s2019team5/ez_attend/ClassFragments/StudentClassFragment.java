@@ -19,17 +19,15 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
-import javax.annotation.Nullable;
-
+import edu.pace.cs389s2019team5.ez_attend.BluetoothAdapter;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Attendee;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.ClassSession;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Model;
 import edu.pace.cs389s2019team5.ez_attend.R;
 
 /**
@@ -79,27 +77,16 @@ public class StudentClassFragment extends Fragment {
             holder.m_listener = view.listenForMarking(classId,
                     model.getId(),
                     userId,
-                    new EventListener<DocumentSnapshot>() {
+                    new OnSuccessListener<Attendee>() {
                         @Override
-                        public void onEvent(@Nullable DocumentSnapshot snapshot,
-                                            @Nullable FirebaseFirestoreException e) {
-
-                            if (snapshot == null) {
-                                Log.e(TAG, "Snapshot is null in the listener");
-                                return;
-                            }
-
-                            if (e != null) {
-                                Log.e(TAG, "Error from listening for attendee");
-                                return;
-                            }
-
-                            if (!snapshot.exists()) {
+                        public void onSuccess(Attendee attendee) {
+                            if (attendee == null) {
                                 holder.m_sessionStatus.setText(R.string.attendance_absent);
                             } else {
-                                Attendee attendee = Attendee.SNAPSHOTPARSER.parseSnapshot(snapshot);
-                                if (attendee.getStudentTimeStamp() == null)
-                                        return;
+                                if (!Model.BLUETOOTH && attendee.getStudentTimeStamp() == null)
+                                    return;
+                                if (Model.BLUETOOTH && attendee.getTeacherTimeStamp() == null)
+                                    return;
                                 if (holder.getAdapterPosition() == position)
                                     // This is equivalent to 10 minutes
                                     holder.m_sessionStatus.setText(
@@ -107,6 +94,11 @@ public class StudentClassFragment extends Fragment {
                                                     model.getStartTime(),
                                                     600000));
                             }
+                        }
+                    }, new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e(TAG, "Error getting student attendance", e);
                         }
                     });
             Log.d(TAG, "Adding listener in bind view");
@@ -190,8 +182,7 @@ public class StudentClassFragment extends Fragment {
     public void checkIn() {
         Log.i(TAG, "Student checking in");
 
-        Controller controller = new Controller();
-        String studentId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        final String studentId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         controller.markPresent(this.classId, studentId, new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
@@ -209,6 +200,48 @@ public class StudentClassFragment extends Fragment {
                 Log.e(TAG, "Couldn't mark student present", e);
             }
         });
+
+        if (!Model.BLUETOOTH) return;
+
+        final BluetoothAdapter bluetoothAdapter = new BluetoothAdapter(this.getActivity(),
+                                                                       BluetoothAdapter.Role.STUDENT,
+                                                                       this.controller);
+
+        this.view.getClassSessionsQuery(this.classId).limit(1).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+
+                if (queryDocumentSnapshots.getDocuments().size() == 0) {
+                    return;
+                }
+
+                ClassSession session = ClassSession.SNAPSHOTPARSER
+                        .parseSnapshot(queryDocumentSnapshots.getDocuments().get(0));
+
+                bluetoothAdapter.signIn(StudentClassFragment.this.view,
+                        StudentClassFragment.this.classId,
+                        session.getId(),
+                        studentId,
+                        new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Toast.makeText(StudentClassFragment.this.getActivity(), "Successfully marked", Toast.LENGTH_SHORT).show();
+                                Log.i(TAG, "Successfully marked present by teacher");
+                            }
+                        }, new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.e(TAG, "Error when attempting to sign in with bluetooth", e);
+                            }
+                        });
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e(TAG, "Error when getting class sessions to sign in", e);
+            }
+        });
+
     }
 
     @Override

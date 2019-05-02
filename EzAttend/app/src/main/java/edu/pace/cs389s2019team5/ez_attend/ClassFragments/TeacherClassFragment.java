@@ -28,9 +28,13 @@ import java.util.Date;
 import java.util.Hashtable;
 
 import edu.pace.cs389s2019team5.ez_attend.AttendanceFragments.SessionsFragment;
+import edu.pace.cs389s2019team5.ez_attend.BluetoothAdapter;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Attendee;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.ClassSession;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Model;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Student;
 import edu.pace.cs389s2019team5.ez_attend.R;
 
 /**
@@ -40,8 +44,13 @@ public class TeacherClassFragment extends Fragment {
 
     private static final String TAG = TeacherClassFragment.class.getName();
     private String classID;
-    public TeacherClassFragment() {
+    private Controller controller;
+    private edu.pace.cs389s2019team5.ez_attend.Firebase.View view;
+    private BluetoothAdapter bluetoothAdapter;
 
+    public TeacherClassFragment() {
+        this.controller = new Controller();
+        this.view = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
     }
     public void setClass(String classID) {
         this.classID = classID;
@@ -73,6 +82,8 @@ public class TeacherClassFragment extends Fragment {
             }
         });
 
+        bluetoothAdapter = new BluetoothAdapter(TeacherClassFragment.this.getActivity(), BluetoothAdapter.Role.TEACHER, controller);
+
         return v;
     }
     public void showAttendance()
@@ -82,15 +93,43 @@ public class TeacherClassFragment extends Fragment {
         getFragmentManager().beginTransaction().replace(R.id.fragment_content, fragment).addToBackStack(TAG).commit();
     }
     public void launchAttendance() {
-        Controller session = new Controller();
 
-        session.beginClassSession(this.classID, new OnSuccessListener<String>() {
+        controller.beginClassSession(this.classID, new OnSuccessListener<String>() {
             @Override
             public void onSuccess(String sessionId) {
-                Toast.makeText(getActivity().getApplicationContext(),
-                        "Successfully taking attendance: " + sessionId,
-                        Toast.LENGTH_SHORT).show();
-                Log.i(TAG, "Successfully taking attendance");
+            Toast.makeText(getActivity().getApplicationContext(),
+                    "Successfully taking attendance: " + sessionId,
+                    Toast.LENGTH_SHORT).show();
+            Log.i(TAG, "Successfully taking attendance");
+
+            if (!Model.BLUETOOTH)
+                return;
+
+            view.getClass(classID,
+                    new OnSuccessListener<Class>() {
+                        @Override
+                        public void onSuccess(Class aClass) {
+                            bluetoothAdapter.beginTakingAttendance(aClass,
+                                    new OnSuccessListener<Student>() {
+                                        @Override
+                                        public void onSuccess(Student student) {
+                                            Log.i(TAG, "Student marked present " + student);
+                                        }
+                                    }, new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.e(TAG, "Failed to mark a student present", e);
+                                        }
+                                    }
+                            );
+                        }
+                    }, new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e(TAG, "Error getting the class");
+                        }
+                    });
+
             }
         }, new OnFailureListener() {
             @Override
@@ -102,9 +141,6 @@ public class TeacherClassFragment extends Fragment {
             }
         });
     }
-
-
-
 
     private ArrayList<ClassSession> sessionsOld;
     private Hashtable<ClassSession, ArrayList<Attendee>> sessionsNew;
@@ -206,5 +242,13 @@ public class TeacherClassFragment extends Fragment {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (Model.BLUETOOTH)
+            bluetoothAdapter.stopTakingAttendance();
     }
 }
