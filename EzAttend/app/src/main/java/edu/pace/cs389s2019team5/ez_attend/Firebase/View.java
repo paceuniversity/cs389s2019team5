@@ -222,7 +222,7 @@ public class View {
      */
     public Query getTeacherClassesQuery(String teacherId) {
         return db.collection(Model.CLASSES)
-                .whereEqualTo("teacherId", teacherId);
+                .whereEqualTo(Class.TEACHERID, teacherId);
     }
 
     /**
@@ -234,7 +234,7 @@ public class View {
      */
     public Query getStudentClassesQuery(String studentId) {
         return db.collection(Model.CLASSES)
-                .whereArrayContains("students", studentId);
+                .whereArrayContains(Class.STUDENTS, studentId);
     }
 
     /**
