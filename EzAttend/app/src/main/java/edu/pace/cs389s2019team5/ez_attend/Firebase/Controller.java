@@ -24,9 +24,6 @@ public class Controller {
     private final static String TAG = Controller.class.getName();
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    // TODO This should no longer be used after sprint2. Current usage is only in the bluetooth adapter
-    public final static String DEBUG_CLASS_ID = "123";
-
     /**
      * Creates a new class session on firebase so that the class attendance can begin
      * getting recorded. It also updates the most recent field of the class

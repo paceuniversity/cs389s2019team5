@@ -9,12 +9,15 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+
+import javax.annotation.Nullable;
 
 public class View {
 
@@ -190,17 +193,20 @@ public class View {
 
     /**
      * Used by students to wait until they are marked present by their teacher.
-     * @param classId the class id of the class that we want to listen on
-     * @param sessionId the id of the session that we wish to listen on
-     * @param studentId the id of the student that we are interested in
-     * @param eventListener the callback for what should happen when we receive an update on this
-     *                      student
+     *
+     * @param classId         the class id of the class that we want to listen on
+     * @param sessionId       the id of the session that we wish to listen on
+     * @param studentId       the id of the student that we are interested in
+     * @param successListener the callback for what should happen when we receive an update on this
+     *                        student
+     * @param failureListener the callback if there is an error when getting the updated attendee
      * @return the listener registration so that the caller can cancel the listener
      */
     public ListenerRegistration listenForMarking(String classId,
                                                  String sessionId,
                                                  String studentId,
-                                                 EventListener<DocumentSnapshot> eventListener) {
+                                                 final OnSuccessListener<Attendee> successListener,
+                                                 final OnFailureListener failureListener) {
 
         final DocumentReference docRef = db.collection(Model.CLASSES)
                 .document(classId)
@@ -209,7 +215,25 @@ public class View {
                 .collection(ClassSession.ATTENDEES)
                 .document(studentId);
 
-        return docRef.addSnapshotListener(eventListener);
+        return docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w(TAG, "Listen Failed", e);
+                    failureListener.onFailure(e);
+                    return;
+                }
+
+                if (snapshot != null && snapshot.exists()) {
+                    Attendee attendee = Attendee.SNAPSHOTPARSER.parseSnapshot(snapshot);
+                    successListener.onSuccess(attendee);
+                } else if (snapshot == null) {
+                    failureListener.onFailure(new NullPointerException("returned snapshot is null"));
+                } else {
+                    successListener.onSuccess(null);
+                }
+            }
+        });
 
     }
 

@@ -6,22 +6,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.annotation.Nullable;
 
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Attendee;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Student;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.View;
@@ -48,10 +48,10 @@ public class BluetoothAdapter {
                 if (deviceMacAddress != null) {
                     Log.v(TAG, "Device with mac address " + deviceMacAddress + " found.");
 
-                    if (BluetoothAdapter.this.studentHashMap.containsKey(deviceMacAddress)) {
+                    if (BluetoothAdapter.this.studentHashtable.containsKey(deviceMacAddress)) {
                         // Mark the student present
-                        final Student student = BluetoothAdapter.this.studentHashMap.get(deviceMacAddress);
-                        BluetoothAdapter.this.controller.teacherMarkPresent(Controller.DEBUG_CLASS_ID,
+                        final Student student = BluetoothAdapter.this.studentHashtable.get(deviceMacAddress);
+                        BluetoothAdapter.this.controller.teacherMarkPresent(m_class.getId(),
                                 student.getId(), new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
@@ -72,8 +72,10 @@ public class BluetoothAdapter {
     private final Context context;
     private final Handler handler;
     private Controller controller;
+    private View view;
+    private Class m_class;
 
-    private HashMap<String, Student> studentHashMap = new HashMap<>();
+    private Hashtable<String, Student> studentHashtable = new Hashtable<>();
 
     private ListenerRegistration listener;
 
@@ -87,6 +89,7 @@ public class BluetoothAdapter {
         this.m_role = role;
         this.context = context;
         this.controller = controller;
+        this.view = new View();
         handler = new Handler(context.getMainLooper());
         this.bluetoothAdapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter();
     }
@@ -95,13 +98,13 @@ public class BluetoothAdapter {
      * Used by the teacher to begin the attendance taking process. This means it will begin scanning
      * for any devices in the area, and writing to the server that the associated student is present.
      *
-     * @param studentsList the list of students in the current class that we should be searching for
+     * @param m_class The class we would like to take attendance for
      * @param onSuccessListener the callback for what should happen when a student is marked present.
      *                          This callback returns the student that was marked present for being
      *                          in the area
      * @param onFailureListener any failure in marking a student present
      */
-    public void beginTakingAttendance(final ArrayList<Student> studentsList,
+    public void beginTakingAttendance(final Class m_class,
                                       OnSuccessListener<Student> onSuccessListener,
                                       OnFailureListener onFailureListener) {
 
@@ -119,9 +122,28 @@ public class BluetoothAdapter {
             stopTakingAttendance();
         }
 
-        // Convert the students list to a hashmap mapping mac address to student obj
-        for (Student student : studentsList) {
-            studentHashMap.put(student.getMacAddress(), student);
+        if (m_class == null) {
+            Log.d(TAG, "the class id must be provided before you can take attendance");
+            return;
+        }
+
+        this.m_class = m_class;
+
+        // Convert the students list to a hashtable mapping mac address to student obj
+        Iterator<String> stringIdIterator = m_class.getStudentIdsIterator();
+        while (stringIdIterator.hasNext()) {
+            String studentId = stringIdIterator.next();
+            view.getStudent(studentId, new OnSuccessListener<Student>() {
+                @Override
+                public void onSuccess(Student student) {
+                    studentHashtable.put(student.getMacAddress(), student);
+                }
+            }, new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.e(TAG, "Error getting student", e);
+                }
+            });
         }
 
         this.receiver.onSuccessListener = onSuccessListener;
@@ -187,7 +209,9 @@ public class BluetoothAdapter {
      * @return true if the listener was successfully initialized, false otherwise such as if bluetooth
      * is disabled.
      */
-    public boolean signIn(View view, String sessionId,
+    public boolean signIn(View view,
+                          String classId,
+                          String sessionId,
                           final String studentId,
                           final OnSuccessListener<Void> successListener,
                           final OnFailureListener failureListener) {
@@ -198,6 +222,7 @@ public class BluetoothAdapter {
 
         if (!bluetoothAdapter.isEnabled()) {
             Log.i(TAG, "Bluetooth isn't enabled");
+            Toast.makeText(this.context, "Bluetooth isn't enabled", Toast.LENGTH_SHORT).show();
             return false;
         }
 
@@ -206,24 +231,16 @@ public class BluetoothAdapter {
         }
 
         // Begin listening to see if I am enabled
-        listener = view.listenForMarking(Controller.DEBUG_CLASS_ID, sessionId, studentId, new EventListener<DocumentSnapshot>() {
+        listener = view.listenForMarking(classId, sessionId, studentId, new OnSuccessListener<Attendee>() {
             @Override
-            public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    Log.w(TAG, "Listen Failed", e);
-                    failureListener.onFailure(e);
-                    return;
-                }
-
-                if (snapshot != null && snapshot.exists()) {
-                    if (snapshot.get("teacherTimestamp") != null) {
-                        Log.i(TAG, "Student detected and marked present by teacher");
-                        BluetoothAdapter.this.removeListener();
-                        successListener.onSuccess(null);
-                    }
+            public void onSuccess(Attendee attendee) {
+                if (attendee.getTeacherTimeStamp() != null) {
+                    Log.i(TAG, "Student detected and marked present by teacher");
+                    BluetoothAdapter.this.removeListener();
+                    successListener.onSuccess(null);
                 }
             }
-        });
+        }, failureListener);
 
         return true;
 
