@@ -267,7 +267,7 @@ public class TeacherClassFragment extends Fragment {
         Uri uri = FileProvider.getUriForFile(getActivity(), "edu.pace.cs389s2019team5.ez_attend.fileprovider", f);
         getActivity().grantUriPermission("edu.pace.cs389s2019team5.ez_attend.ClassFragments", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.putExtra(Intent.EXTRA_STREAM, uri);
-        startActivity(Intent.createChooser(intent, "Create email"));
+        startActivity(Intent.createChooser(intent, "Export Attendance"));
     }
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
