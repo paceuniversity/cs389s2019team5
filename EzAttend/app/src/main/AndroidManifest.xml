@@ -34,7 +34,7 @@
                 android:value="edu.pace.cs389s2019team5.ez_attend.MainActivity" />
         <activity
             android:name=".MainActivity"
-            android:label="@string/title_activity_main"
+            android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
