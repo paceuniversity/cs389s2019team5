@@ -27,10 +27,12 @@ import com.opencsv.CSVWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.AllPermission;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.Iterator;
 
 import edu.pace.cs389s2019team5.ez_attend.AttendanceFragments.SessionsFragment;
 import edu.pace.cs389s2019team5.ez_attend.BluetoothAdapter;
@@ -211,30 +213,99 @@ public class TeacherClassFragment extends Fragment {
                 name = name.replaceAll(":","-");
                 File file = new File(Environment.getExternalStoragePublicDirectory(
                         Environment.DIRECTORY_DOWNLOADS), name);
-                CSVWriter writer = new CSVWriter(new FileWriter(file));
+                final CSVWriter writer = new CSVWriter(new FileWriter(file));
 
                 Log.i(TAG, "Log:" + name);
 
-                String[] record = {"Class Session ID", "Class Session Date", "Class Session Attendees"};
+                String[] record = {"Class Session ID", "Class Session Date", "Class Session Attendees", "Present/Absent"};
                 writer.writeNext(record);
 
+                final edu.pace.cs389s2019team5.ez_attend.Firebase.View v = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
+                v.getClass(this.classID, new OnSuccessListener<Class>() {
+                    @Override
+                    public void onSuccess(Class aClass) {
+                        Iterator<String> studentIDs = aClass.getStudentIdsIterator();
+                        ArrayList<String> allStudents = new ArrayList<String>();
+                        while (studentIDs.hasNext()) {
+                            allStudents.add(studentIDs.next());
+                        }
+                        for (ClassSession i : sessionsNew.keySet()) {
+                            String id = i.getId();
+                            Date date = i.getStartTime();
+                            ArrayList<String> presentStudents = new ArrayList<String>();
+                            ArrayList<String> absentStudents = new ArrayList<String>();
+                            ArrayList<Attendee> sessionAttendees = sessionsNew.get(i);
+                            boolean presentTest = false;
+                            for (int j = 0; j< allStudents.size();j++) {
+                                for (Attendee attendee:sessionAttendees) {
+                                    if (attendee.getId().equals(allStudents.get(j))) {
+                                        presentStudents.add(allStudents.get(j));
+                                        presentTest = true;
+                                        break;
+                                    }
+                                }
+                                if (!presentTest) {
+                                    absentStudents.add(allStudents.get(j));
+                                }
+                            }
+                            String[] entry = {id, date.toString(), " "," "};
+                            writer.writeNext(entry);
+                            for (int k =0; k< presentStudents.size();k++) {
+                                v.getStudent(allStudents.get(k), new OnSuccessListener<Student>() {
+                                    @Override
+                                    public void onSuccess(Student student) {
+                                        String[] entry = { " "," ", student.getFirstName()+" "+student.getLastName(), "Present"};
+                                        writer.writeNext(entry);
+                                    }
+                                }, new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
 
-                for (ClassSession i : sessionsNew.keySet()) {
-                    String id = i.getId();
-                    Date date = i.getStartTime();
-                    String students = "";
-                    ArrayList<Attendee> sessionAttendees = sessionsNew.get(i);
-                    for (Attendee attendee : sessionAttendees) {
-                        students += attendee.getId();
-                        students += "&";
+                                    }
+                                });
+                            }
+                            for (int k =0; k< absentStudents.size();k++) {
+                                v.getStudent(allStudents.get(k), new OnSuccessListener<Student>() {
+                                    @Override
+                                    public void onSuccess(Student student) {
+                                        String[] entry = { " "," ", student.getFirstName()+" "+student.getLastName(), "Absent"};
+                                        writer.writeNext(entry);
+                                    }
+                                }, new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+
+                                    }
+                                });
+                            }
+                        }
+                        try {
+                            writer.close();
+                        } catch (IOException e) {
+                            Log.e(TAG, "Error when attempting to close the writer", e);
+                        }
+
                     }
-                    if (students.length() != 0)
-                        students = students.substring(0, students.length() - 1);
-                    String[] entry = {id, date.toString(), students};
-                    writer.writeNext(entry);
-                }
-                writer.close();
-                openEmail(file, FirebaseAuth.getInstance().getCurrentUser().getEmail());
+                }, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+
+                    }
+                });
+
+
+//                    for (Attendee attendee : sessionAttendees) {
+//                        students += attendee.getId();
+//                        students += "&";
+//                    }
+//                    if (students.length() != 0)
+//                        students = students.substring(0, students.length() - 1);
+//                    String[] entry = {id, date.toString(), students};
+//                    writer.writeNext(entry);
+//                }
+//                writer.close();
+//                openEmail(file, FirebaseAuth.getInstance().getCurrentUser().getEmail());
             }
         } catch (IOException e) {
             Log.e(TAG, "Error when attempting to export attendance", e);
