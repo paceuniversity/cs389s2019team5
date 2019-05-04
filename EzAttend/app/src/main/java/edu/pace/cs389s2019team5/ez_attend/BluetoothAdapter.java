@@ -234,7 +234,7 @@ public class BluetoothAdapter {
         listener = view.listenForMarking(classId, sessionId, studentId, new OnSuccessListener<Attendee>() {
             @Override
             public void onSuccess(Attendee attendee) {
-                if (attendee.getTeacherTimeStamp() != null) {
+                if (attendee != null && attendee.getTeacherTimeStamp() != null) {
                     Log.i(TAG, "Student detected and marked present by teacher");
                     BluetoothAdapter.this.removeListener();
                     successListener.onSuccess(null);
