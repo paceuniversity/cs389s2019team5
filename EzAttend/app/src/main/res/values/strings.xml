@@ -40,4 +40,5 @@
     <string name="mark_present">Mark Present</string>
     <string name="mark_late">Mark Late</string>
     <string name="mark_absent">Mark Absent</string>
+    <string name="class_id_2">Class ID:</string>
 </resources>
