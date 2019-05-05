@@ -3,6 +3,7 @@ package edu.pace.cs389s2019team5.ez_attend.ClassListFragments;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -18,6 +19,7 @@ import com.google.firebase.firestore.Query;
 
 import edu.pace.cs389s2019team5.ez_attend.ClassFragments.StudentClassFragment;
 import edu.pace.cs389s2019team5.ez_attend.ClassFragments.TeacherClassFragment;
+import edu.pace.cs389s2019team5.ez_attend.ClassListActivity;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
 import edu.pace.cs389s2019team5.ez_attend.R;
@@ -58,6 +60,7 @@ public class RecentFragment extends Fragment {
             this.rv1.setAdapter(this.adapter1);
         if(this.adapter2!=null)
             this.rv2.setAdapter(this.adapter2);
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Recent");
         return v;
     }
 

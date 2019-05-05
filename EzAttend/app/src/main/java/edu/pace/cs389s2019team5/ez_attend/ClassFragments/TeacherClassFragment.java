@@ -12,11 +12,13 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -84,6 +86,22 @@ public class TeacherClassFragment extends Fragment {
         showAttendance.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 showAttendance();
+            }
+        });
+
+        TextView txt = v.findViewById(R.id.textViewClassID);
+        txt.setText(this.classID);
+
+        edu.pace.cs389s2019team5.ez_attend.Firebase.View view = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
+        view.getClass(classID, new OnSuccessListener<Class>() {
+            @Override
+            public void onSuccess(Class aClass) {
+                ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(aClass.getClassName());
+            }
+        }, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e(TAG, "Failed to get class name", e);
             }
         });
 
@@ -249,7 +267,7 @@ public class TeacherClassFragment extends Fragment {
         Uri uri = FileProvider.getUriForFile(getActivity(), "edu.pace.cs389s2019team5.ez_attend.fileprovider", f);
         getActivity().grantUriPermission("edu.pace.cs389s2019team5.ez_attend.ClassFragments", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.putExtra(Intent.EXTRA_STREAM, uri);
-        startActivity(Intent.createChooser(intent, "Create email"));
+        startActivity(Intent.createChooser(intent, "Export Attendance"));
     }
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();

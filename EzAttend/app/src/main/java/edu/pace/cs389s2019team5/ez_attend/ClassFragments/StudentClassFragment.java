@@ -4,6 +4,7 @@ package edu.pace.cs389s2019team5.ez_attend.ClassFragments;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -25,6 +26,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import edu.pace.cs389s2019team5.ez_attend.BluetoothAdapter;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Attendee;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.ClassSession;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Model;
@@ -172,6 +174,19 @@ public class StudentClassFragment extends Fragment {
 
         this.mAdapter = new SessionAttendanceAdapter(options);
         this.recyclerView.setLayoutManager(layoutManager);
+
+        edu.pace.cs389s2019team5.ez_attend.Firebase.View view = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
+        view.getClass(classId, new OnSuccessListener<Class>() {
+            @Override
+            public void onSuccess(Class aClass) {
+                ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(aClass.getClassName());
+            }
+        }, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e(TAG, "Failed to get class name", e);
+            }
+        });
 
         return v;
     }
