@@ -8,6 +8,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -289,6 +290,47 @@ public class View {
                 .collection(Class.SESSIONS)
                 .document(sessionId)
                 .collection(ClassSession.ATTENDEES);
+    }
+
+    /**
+     * Gets the classes with a certain id prefix. This does not only give back ids that only start
+     * with the prefix. It gets the classes after the prefix.
+     *
+     * @param prefix            the id to begin the search on.
+     * @param limit             the limit for the query. what is the max number of classes to return
+     * @param onSuccessListener the callback when it is successful
+     * @param onFailureListener the callback when there was an error getting the classes
+     */
+    public void getClassesWithIdPrefix(String prefix,
+                                       int limit,
+                                       final OnSuccessListener<ArrayList<Class>> onSuccessListener,
+                                       OnFailureListener onFailureListener) {
+
+        if (prefix.trim().equals("")) {
+            Log.w(TAG, "You cannot pass an empty prefix");
+            return;
+        }
+
+        db.collection(Model.CLASSES)
+                .whereGreaterThanOrEqualTo(FieldPath.documentId(), prefix)
+                .orderBy(FieldPath.documentId(), Query.Direction.ASCENDING)
+                .limit(limit)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+
+                        ArrayList<Class> res = new ArrayList<>();
+                        for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                            res.add(Class.SNAPSHOTPARSER.parseSnapshot(doc));
+                        }
+
+                        onSuccessListener.onSuccess(res);
+
+                    }
+                })
+                .addOnFailureListener(onFailureListener);
+
     }
 
 }

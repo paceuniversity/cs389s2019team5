@@ -7,12 +7,15 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
@@ -21,6 +24,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.Query;
+
+import java.util.ArrayList;
 
 import edu.pace.cs389s2019team5.ez_attend.ClassFragments.StudentClassFragment;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
@@ -35,6 +40,7 @@ public class StudentFragment extends Fragment {
     private FirestoreRecyclerAdapter adapter;
     private RecyclerView rv;
     private RecyclerView.LayoutManager layoutManager;
+    private AutoCompleteTextView textView;
 
     private edu.pace.cs389s2019team5.ez_attend.Firebase.View view;
     private Controller controller;
@@ -51,12 +57,12 @@ public class StudentFragment extends Fragment {
                              Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.fragment_student, container, false);
         Button joinClass = v.findViewById(R.id.joinClassButton);
+        textView = v.findViewById(R.id.classInput);
         joinClass.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                EditText tempClassText = v.findViewById(R.id.classInput);
-                String classID = tempClassText.getText().toString().trim();
+                String classID = textView.getText().toString().trim();
                 joinClass(classID);
-                tempClassText.setText("");
+                textView.setText("");
             }
         });
         createAdapter();
@@ -64,6 +70,59 @@ public class StudentFragment extends Fragment {
         this.layoutManager = new LinearLayoutManager(this.getActivity());
         this.rv.setLayoutManager(this.layoutManager);
         this.rv.setAdapter(this.adapter);
+
+        Log.d(TAG, "Setting up the get classes with prefix");
+
+
+        textView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // THIS IS NOT NEEDED RIGHT NOW
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // THIS IS NOT NEEDED RIGHT NOW
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                /*
+                    Whenever the user types something into the text box we update the items in the
+                    adapter. This doesn't sound very efficient but we do not expect users to be
+                    typing very quickly since the ids are generally difficult to remember. For that
+                    reason, in practice this should suffice without the overhead of retrieving all
+                    the document ids.
+                 */
+                if (editable.toString().trim().equals("")) {
+                    textView.setAdapter(null);
+                    return;
+                }
+
+                view.getClassesWithIdPrefix(editable.toString(), 3,
+                        new OnSuccessListener<ArrayList<Class>>() {
+                            @Override
+                            public void onSuccess(ArrayList<Class> classes) {
+
+                                Log.d(TAG, "On Success in get classes with prefix:" + classes.size());
+                                String[] stringArr = new String[classes.size()];
+                                int i = 0;
+                                for (Class currClass : classes) {
+                                    Log.d(TAG, "Adding document to string adapter " + currClass.getId());
+                                    stringArr[i++] = currClass.getId();
+                                }
+                                ArrayAdapter<String> adapter = new ArrayAdapter<String>(StudentFragment.this.getContext(), android.R.layout.simple_list_item_1, stringArr);
+                                textView.setAdapter(adapter);
+                            }
+                        }, new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.e(TAG, "Error when getting class ids");
+                            }
+                        });
+            }
+        });
+
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Student");
         return v;
     }
