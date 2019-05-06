@@ -8,12 +8,17 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+
+import javax.annotation.Nullable;
 
 public class View {
 
@@ -33,13 +38,13 @@ public class View {
                             final OnSuccessListener<Class> onSuccessListener,
                             final OnFailureListener onFailureListener) {
 
-        db.collection("classes")
+        db.collection(Model.CLASSES)
                 .document(classId).get()
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
 
-                        Class m_class = Class.fromSnapshot(documentSnapshot);
+                        Class m_class = Class.SNAPSHOTPARSER.parseSnapshot(documentSnapshot);
                         onSuccessListener.onSuccess(m_class);
                     }
                 })
@@ -57,7 +62,7 @@ public class View {
                            final OnSuccessListener<Student> onSuccessListener,
                            OnFailureListener onFailureListener) {
 
-        DocumentReference docRef = db.collection("students").document(id);
+        DocumentReference docRef = db.collection(Model.STUDENTS).document(id);
         docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot snapshot) {
@@ -89,9 +94,9 @@ public class View {
                             final OnSuccessListener<ArrayList<ClassSession>> onSuccessListener,
                             OnFailureListener onFailureListener) {
 
-        db.collection("classes")
+        db.collection(Model.CLASSES)
                 .document(classId)
-                .collection("sessions")
+                .collection(Class.SESSIONS)
                 .orderBy("startTime")
                 .get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -124,9 +129,9 @@ public class View {
                                      final OnSuccessListener<ArrayList<Attendee>> onSuccessListener,
                                      OnFailureListener onFailureListener) {
 
-        CollectionReference attendeesCollection = db.collection("classes")
+        CollectionReference attendeesCollection = db.collection(Model.CLASSES)
                 .document(classId)
-                .collection("sessions")
+                .collection(Class.SESSIONS)
                 .document(session.getId())
                 .collection(ClassSession.ATTENDEES);
 
@@ -136,7 +141,7 @@ public class View {
                 ArrayList<Attendee> attendees = new ArrayList<>();
                 for (QueryDocumentSnapshot snap : snapshot) {
                     Log.d(TAG, "Got attendee with id: " + snap.getId());
-                    attendees.add(Attendee.fromSnapshot(snap));
+                    attendees.add(Attendee.SNAPSHOTPARSER.parseSnapshot(snap));
                 }
 
                 onSuccessListener.onSuccess(attendees);
@@ -166,7 +171,7 @@ public class View {
                             final OnFailureListener onFailureListener) {
 
         Log.i(TAG, "Getting stuff for " + attendeeId);
-        db.collection("classes")
+        db.collection(Model.CLASSES)
                 .document(classId)
                 .collection(Class.SESSIONS)
                 .document(sessionId)
@@ -177,7 +182,7 @@ public class View {
             public void onSuccess(DocumentSnapshot snapshot) {
                 // Convert the given snapshot to an attendee object
                 if (snapshot.exists()) {
-                    Attendee attendee = Attendee.fromSnapshot(snapshot);
+                    Attendee attendee = Attendee.SNAPSHOTPARSER.parseSnapshot(snapshot);
                     onSuccessListener.onSuccess(attendee);
                 } else {
                     onSuccessListener.onSuccess(null);
@@ -189,24 +194,142 @@ public class View {
 
     /**
      * Used by students to wait until they are marked present by their teacher.
-     * @param classId the class id of the class that we want to listen on
-     * @param courseId the id of the session that we wish to listen on
-     * @param studentId the id of the student that we are interested in
-     * @param eventListener the callback for what should happen when we receive an update on this
-     *                      student
+     *
+     * @param classId         the class id of the class that we want to listen on
+     * @param sessionId       the id of the session that we wish to listen on
+     * @param studentId       the id of the student that we are interested in
+     * @param successListener the callback for what should happen when we receive an update on this
+     *                        student
+     * @param failureListener the callback if there is an error when getting the updated attendee
      * @return the listener registration so that the caller can cancel the listener
      */
     public ListenerRegistration listenForMarking(String classId,
-                                                 String courseId,
+                                                 String sessionId,
                                                  String studentId,
-                                                 EventListener<DocumentSnapshot> eventListener) {
+                                                 final OnSuccessListener<Attendee> successListener,
+                                                 final OnFailureListener failureListener) {
 
-        final DocumentReference docRef = db.collection("classes")
+        final DocumentReference docRef = db.collection(Model.CLASSES)
                 .document(classId)
-                .collection("sessions/ " + courseId + "/attendees")
+                .collection(Class.SESSIONS)
+                .document(sessionId)
+                .collection(ClassSession.ATTENDEES)
                 .document(studentId);
 
-        return docRef.addSnapshotListener(eventListener);
+        return docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w(TAG, "Listen Failed", e);
+                    failureListener.onFailure(e);
+                    return;
+                }
+
+                if (snapshot != null && snapshot.exists()) {
+                    Attendee attendee = Attendee.SNAPSHOTPARSER.parseSnapshot(snapshot);
+                    successListener.onSuccess(attendee);
+                } else if (snapshot == null) {
+                    failureListener.onFailure(new NullPointerException("returned snapshot is null"));
+                } else {
+                    successListener.onSuccess(null);
+                }
+            }
+        });
+
+    }
+
+    /**
+     * Get a query to go through the most recent classes being taught by the teacher with the
+     * provided teacher id
+     *
+     * @param teacherId the teacher id for the classes to query for
+     * @return the query reference
+     */
+    public Query getTeacherClassesQuery(String teacherId) {
+        return db.collection(Model.CLASSES)
+                .whereEqualTo(Class.TEACHERID, teacherId);
+    }
+
+    /**
+     * Get a query to query for the most recent classes in which the student with the provided
+     * student is enrolled in
+     *
+     * @param studentId the student id of the student to search for
+     * @return the query reference for this query
+     */
+    public Query getStudentClassesQuery(String studentId) {
+        return db.collection(Model.CLASSES)
+                .whereArrayContains(Class.STUDENTS, studentId);
+    }
+
+    /**
+     * Get a query for the class sessions, ordered by their start time in descending order.
+     * This means that the most recent classes will come first
+     *
+     * @param classId the id of the class we are querying the sessions for
+     * @return the query reference for this query
+     */
+    public Query getClassSessionsQuery(String classId) {
+        return db.collection(Model.CLASSES)
+                .document(classId)
+                .collection(Class.SESSIONS)
+                .orderBy("startTime", Query.Direction.DESCENDING);
+    }
+
+    /**
+     * Get a query for the attendees of a provided class session.
+     *
+     * @param classId   the id of the class that the session is a part of
+     * @param sessionId the id of the session to query
+     * @return the query reference for this query
+     */
+    public Query getAttendeesQuery(String classId, String sessionId) {
+        return db
+                .collection("classes")
+                .document(classId)
+                .collection(Class.SESSIONS)
+                .document(sessionId)
+                .collection(ClassSession.ATTENDEES);
+    }
+
+    /**
+     * Gets the classes with a certain id prefix. This does not only give back ids that only start
+     * with the prefix. It gets the classes after the prefix.
+     *
+     * @param prefix            the id to begin the search on.
+     * @param limit             the limit for the query. what is the max number of classes to return
+     * @param onSuccessListener the callback when it is successful
+     * @param onFailureListener the callback when there was an error getting the classes
+     */
+    public void getClassesWithIdPrefix(String prefix,
+                                       int limit,
+                                       final OnSuccessListener<ArrayList<Class>> onSuccessListener,
+                                       OnFailureListener onFailureListener) {
+
+        if (prefix.trim().equals("")) {
+            Log.w(TAG, "You cannot pass an empty prefix");
+            return;
+        }
+
+        db.collection(Model.CLASSES)
+                .whereGreaterThanOrEqualTo(FieldPath.documentId(), prefix)
+                .orderBy(FieldPath.documentId(), Query.Direction.ASCENDING)
+                .limit(limit)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+
+                        ArrayList<Class> res = new ArrayList<>();
+                        for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                            res.add(Class.SNAPSHOTPARSER.parseSnapshot(doc));
+                        }
+
+                        onSuccessListener.onSuccess(res);
+
+                    }
+                })
+                .addOnFailureListener(onFailureListener);
 
     }
 

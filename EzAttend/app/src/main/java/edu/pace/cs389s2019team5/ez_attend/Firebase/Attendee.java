@@ -11,6 +11,10 @@ import java.util.Date;
 public class Attendee {
 
     private final static String TAG = Attendee.class.getName();
+    public final static String TIMESTAMP = "timeStamp";
+    public enum Mark {
+        PRESENT, LATE, ABSENT;
+    }
 
     public final static SnapshotParser<Attendee> SNAPSHOTPARSER = new SnapshotParser<Attendee>() {
         @NonNull
@@ -48,7 +52,18 @@ public class Attendee {
 
         // Check if student is late
         long startInMillis = startTime.getTime();
-        long studentArrival = this.getStudentTimeStamp().getTime();
+
+        long studentArrival = 0;
+        try {
+            if (!Model.BLUETOOTH)
+                studentArrival = this.getStudentTimeStamp().getTime();
+            else
+                studentArrival = this.getTeacherTimeStamp().getTime();
+        }
+        catch(NullPointerException e)
+        {
+            return context.getResources().getString(edu.pace.cs389s2019team5.ez_attend.R.string.attendance_absent);
+        }
         startInMillis += timeToLate;
 
         if (startInMillis < studentArrival) {

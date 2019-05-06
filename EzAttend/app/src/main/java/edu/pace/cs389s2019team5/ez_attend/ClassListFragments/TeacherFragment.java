@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -19,7 +20,6 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import edu.pace.cs389s2019team5.ez_attend.ClassFragments.TeacherClassFragment;
@@ -35,8 +35,14 @@ public class TeacherFragment extends Fragment {
     private FirestoreRecyclerAdapter adapter;
     private RecyclerView rv;
     private RecyclerView.LayoutManager layoutManager;
+
+    private edu.pace.cs389s2019team5.ez_attend.Firebase.View view;
+    private Controller controller;
+
     public TeacherFragment() {
         this.user = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        this.view = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
+        this.controller = new Controller();
     }
 
 
@@ -65,12 +71,14 @@ public class TeacherFragment extends Fragment {
         this.layoutManager = new LinearLayoutManager(this.getActivity());
         this.rv.setLayoutManager(this.layoutManager);
         this.rv.setAdapter(this.adapter);
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Teacher");
         return v;
     }
 
     private void createAdapter() {
-        Query query = FirebaseFirestore.getInstance().collection("classes").whereEqualTo("teacherId",this.user);
-        FirestoreRecyclerOptions<Class> options = new FirestoreRecyclerOptions.Builder<Class>().setQuery(query, Class.SNAPSHOTPARSER).build();
+        Query query = view.getTeacherClassesQuery(this.user);
+        FirestoreRecyclerOptions<Class> options = new FirestoreRecyclerOptions.Builder<Class>()
+                .setQuery(query, Class.SNAPSHOTPARSER).build();
 
         this.adapter = new FirestoreRecyclerAdapter<Class, TeacherFragment.ClassHolder>(options) {
             @Override

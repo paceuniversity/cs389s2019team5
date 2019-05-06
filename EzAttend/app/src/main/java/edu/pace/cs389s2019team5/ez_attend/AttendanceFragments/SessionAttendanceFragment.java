@@ -12,14 +12,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
-import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.ListenerRegistration;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Attendee;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.Class;
 import edu.pace.cs389s2019team5.ez_attend.Firebase.ClassSession;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Student;
 import edu.pace.cs389s2019team5.ez_attend.R;
 
 /**
@@ -35,28 +39,98 @@ public class SessionAttendanceFragment extends Fragment {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
 
-    public class SessionAttendanceAdapter extends FirestoreRecyclerAdapter<Attendee, AttendeeViewHolder> {
+    private edu.pace.cs389s2019team5.ez_attend.Firebase.View view;
+    private Controller controller;
 
-        public SessionAttendanceAdapter(@NonNull FirestoreRecyclerOptions<Attendee> options) {
-            super(options);
+    public class SessionAttendanceAdapter extends RecyclerView.Adapter<AttendeeViewHolder>
+    {
+        private ArrayList<String> attendeeIds;
+        public SessionAttendanceAdapter(ArrayList<String> attendees) {
+            this.attendeeIds = attendees;
         }
 
         @Override
-        protected void onBindViewHolder(@NonNull final AttendeeViewHolder holder,
-                                        final int position,
-                                        @NonNull final Attendee model) {
+        public int getItemCount() {
+            return attendeeIds.size();
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull final AttendeeViewHolder holder,
+                                     final int position) {
 
             Log.d(TAG, "Binding view holder");
-            holder.m_attendeeId.setText(model.getId());
+            edu.pace.cs389s2019team5.ez_attend.Firebase.View v = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
 
-            // This caches the result in attendees so it doesn't reload every time the user
-            // scrolls through the attendance records
+            if (holder.m_listener != null) {
+                Log.d(TAG, "Removing listener");
+                holder.m_listener.remove();
+            }
 
-            holder.m_attendeeStatus.setText(
-                    model.getAttendeeStatus(SessionAttendanceFragment.this.getContext(),
-                            m_session.getStartTime(),
-                            600000));
+            v.getStudent(attendeeIds.get(position), new OnSuccessListener<Student>() {
+                @Override
+                public void onSuccess(final Student s) {
+                    // This caches the result in attendees so it doesn't reload every time the user
+                    // scrolls through the attendance records...haha not anymore
 
+                    if (position != holder.getAdapterPosition()) return;
+
+                    holder.m_attendeeId.setText(s.getFirstName() + " " + s.getLastName());
+
+                    holder.m_attendeeStatus.setText(R.string.attendance_loading);
+
+                    holder.m_listener = view.listenForMarking(classId,
+                            m_session.getId(),
+                            s.getId(),
+                            new OnSuccessListener<Attendee>() {
+                                @Override
+                                public void onSuccess(Attendee attendee) {
+                                    if (holder.getAdapterPosition() != position) return;
+                                    if (attendee == null) {
+                                        holder.m_attendeeStatus.setText(R.string.attendance_absent);
+                                    } else {
+                                        // This is equivalent to 10 minutes
+                                        holder.m_attendeeStatus.setText(
+                                                attendee.getAttendeeStatus(SessionAttendanceFragment.this.getActivity(),
+                                                        m_session.getStartTime(),
+                                                        600000));
+                                    }
+                                }
+                            }, new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.e(TAG, "Error getting student attendance", e);
+                                }
+                            });
+
+                    holder.m_attendeeId.setOnClickListener(new View.OnClickListener() {
+                        public void onClick(View view) {
+                            openStudent(classId, m_session.getId(), s.getId(), s.getFirstName() + " " + s.getLastName());
+                        }
+                    });
+
+                    holder.m_attendeeStatus.setOnClickListener(new View.OnClickListener() {
+                        public void onClick(View view) {
+                            openStudent(classId, m_session.getId(), s.getId(), s.getFirstName() + " " + s.getLastName());
+                        }
+                    });
+                }
+            }, new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+
+                    Log.e(TAG, "Error when attempting to display attendee", e);
+                }
+            });
+        }
+
+        @Override
+        public void onViewDetachedFromWindow(@NonNull AttendeeViewHolder holder) {
+            if (holder.m_listener != null) {
+                Log.d(TAG, "Detaching listener in onViewDetachedFromWindow");
+                holder.m_listener.remove();
+                holder.m_listener = null;
+            }
+            super.onViewDetachedFromWindow(holder);
         }
 
         @NonNull
@@ -68,21 +142,37 @@ public class SessionAttendanceFragment extends Fragment {
         }
     }
 
+    private void openStudent(String classId, String sessionId, String studentId, String studentName) {
+        EditAttendanceFragment fragment = new EditAttendanceFragment();
+        fragment.setClassId(classId);
+        fragment.setSessionId(sessionId);
+        fragment.setStudentId(studentId);
+        fragment.setStudentName(studentName);
+        getFragmentManager().beginTransaction().replace(R.id.fragment_content, fragment).addToBackStack(TAG).commit();
+    }
+
+
+
+
     public class AttendeeViewHolder extends RecyclerView.ViewHolder {
 
         private TextView m_attendeeId;
         private TextView m_attendeeStatus;
+        private ListenerRegistration m_listener;
 
         public AttendeeViewHolder(@NonNull View itemView) {
             super(itemView);
 
             this.m_attendeeId = itemView.findViewById(R.id.txtSessionStartTime);
             this.m_attendeeStatus = itemView.findViewById(R.id.txtSessionAttendanceStatus);
+            this.m_listener = null;
         }
 
     }
 
     public SessionAttendanceFragment() {
+        this.view = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
+        this.controller = new Controller();
     }
 
     public void setClassId(String classId) {
@@ -105,34 +195,42 @@ public class SessionAttendanceFragment extends Fragment {
 
         layoutManager = new LinearLayoutManager(getActivity());
 
-        Query query = FirebaseFirestore.getInstance()
-                .collection("classes")
-                .document(classId)
-                .collection(Class.SESSIONS)
-                .document(m_session.getId())
-                .collection(ClassSession.ATTENDEES);
+        view.getClass(classId,  new OnSuccessListener<Class>() {
+            @Override
+            public void onSuccess(final Class c)
+            {
 
-        FirestoreRecyclerOptions<Attendee> options = new FirestoreRecyclerOptions.Builder<Attendee>()
-                .setQuery(query, Attendee.SNAPSHOTPARSER)
-                .build();
+                ArrayList<String> list = new ArrayList<>();
+                Iterator<String> studentIds = c.getStudentIdsIterator();
+                while (studentIds.hasNext()) {
+                    list.add(studentIds.next());
+                }
 
-        this.mAdapter = new SessionAttendanceAdapter(options);
-        this.recyclerView.setLayoutManager(layoutManager);
-        this.recyclerView.setAdapter(this.mAdapter);
+                mAdapter = new SessionAttendanceAdapter(list);
+                recyclerView.setLayoutManager(layoutManager);
+                recyclerView.setAdapter(mAdapter);
 
+            }
+        }, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+                Log.e(TAG, "Error when attempting to get class", e);
+            }
+        });
         return v;
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        ((FirestoreRecyclerAdapter) this.mAdapter).startListening();
+        this.recyclerView.setAdapter(this.mAdapter);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        ((FirestoreRecyclerAdapter) this.mAdapter).stopListening();
+        this.recyclerView.setAdapter(null);
     }
 
 }

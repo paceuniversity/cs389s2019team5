@@ -36,4 +36,9 @@
     <string name="class_id">Class ID</string>
     <string name="class_name">Class Name</string>
     <string name="export_attendance">Export Attendance</string>
+    <string name="temp">temp</string>
+    <string name="mark_present">Mark Present</string>
+    <string name="mark_late">Mark Late</string>
+    <string name="mark_absent">Mark Absent</string>
+    <string name="class_id_2">Class ID:</string>
 </resources>

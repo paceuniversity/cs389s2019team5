@@ -13,12 +13,12 @@ import android.widget.Button;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import java.util.Calendar;
 
 import edu.pace.cs389s2019team5.ez_attend.Firebase.ClassSession;
+import edu.pace.cs389s2019team5.ez_attend.Firebase.Controller;
 import edu.pace.cs389s2019team5.ez_attend.R;
 
 /**
@@ -34,8 +34,12 @@ public class SessionsFragment extends Fragment {
     private FirestoreRecyclerAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
 
+    private edu.pace.cs389s2019team5.ez_attend.Firebase.View view;
+    private Controller controller;
+
     public SessionsFragment() {
-        // Required empty public constructor
+        this.controller = new Controller();
+        this.view = new edu.pace.cs389s2019team5.ez_attend.Firebase.View();
     }
 
 
@@ -55,7 +59,7 @@ public class SessionsFragment extends Fragment {
         this.classId = classId;
     }
     private void createAdapter() {
-        Query query = FirebaseFirestore.getInstance().collection("classes").document(classId).collection("sessions");
+        Query query = view.getClassSessionsQuery(this.classId);
         FirestoreRecyclerOptions<ClassSession> options = new FirestoreRecyclerOptions.Builder<ClassSession>().setQuery(query, ClassSession.SNAPSHOTPARSER).build();
 
         this.adapter = new FirestoreRecyclerAdapter<ClassSession, SessionsFragment.ClassHolder>(options) {
